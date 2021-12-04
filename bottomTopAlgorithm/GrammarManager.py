@@ -13,6 +13,7 @@ class GrammarManager:
     def __init__(self):
         self.VT = []
         self.VN = []
+        self.sentences = []
         self.basicFirstSet = dict()
         self.FIRSTVT = dict()
         self.LASTVT = dict()
@@ -45,6 +46,7 @@ class GrammarManager:
 
         # 计算终结符和非终结符
         self.calculateVTandVN()
+        # print(self.sentences)
 
     # 给定字符串
     def getStr(self, sentences):
@@ -305,7 +307,20 @@ class GrammarManager:
 
         self.LASTVT = self.getFirstVTorLastVT("LAST")
 
+    def get_number_of_sentence(self, sentence):
+        """
+        3.5 之后的算法都拓展一列规约产生式的编号，通过这个函数，可以获得算法中所用的四元产生式（state）的产生式编号
+        :param sentence: 的格式是 [左侧, 右侧, 当前位置, 接受字符]
+        :return: sentence 的产生式编号
+        """
+        s = [sentence[0], sentence[1]]
+        if s not in self.sentences:
+            raise Exception("不存在的产生式")
+        # +1，从1开始
+        return self.sentences.index(s)+1
+
 
 if __name__ == '__main__':
     g = GrammarManager()
     g.getInput()
+    # print(g.get_number_of_sentence(['E', 'i']))
