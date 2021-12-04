@@ -9,12 +9,15 @@ import copy
 
 
 from GrammarManager import GrammarManager
-    
+from graphviz import Digraph
 
 class LR0:
     def __init__(self):
         self.grammarManager=GrammarManager()
         self.grammarManager.getInput()
+        
+        # 状态转移矩阵
+        self.translationArray=dict()
     
     '''
     计算initialRelation的闭包
@@ -85,8 +88,7 @@ class LR0:
         initialState=self.getClosure(initialRelation)
         
         self.states=[initialState]
-        # 状态转移矩阵
-        self.translationArray=dict()
+        
         
         # 从initialState开始扩展
         hasGrown=True
@@ -147,9 +149,36 @@ class LR0:
             self.states=newStates
 
 
-"""
-绘图
-"""
+
+    """
+    绘图
+    """
+    def getImage(self):
+        if len(self.translationArray)==0:
+            self.calculateDFA()
+        
+        g = Digraph('基于 LR(0)项目的 DFA图')
+        
+        # 添加结点
+        for index,item in enumerate(self.states):
+            showLabel=""
+            # str(index)+"     "
+            for j in item:
+                showLabel+=j[0]+"->"
+                for t in range(len(j[1])):
+                    if t==j[2]:
+                        showLabel+="·"
+                    showLabel+=j[1][t]
+                if j[2]>=len(j[1]):
+                    showLabel+="·"
+                showLabel+="\l"
+            g.node(name=str(index),label=showLabel,xlabel=str(index),shape="box")
+        
+        # 添加边
+        for i in self.translationArray:
+            g.edge(str(i[0]),str(self.translationArray[(i[0],i[1])]),label=str(i[1]))
+        
+        g.view()
 
 
 class LR1:
@@ -297,10 +326,71 @@ class LR1:
                         self.translationArray[(i,j)]=len(newStates)-1
             
             self.states=newStates
-    
+
+    """
+    绘图
+    """
+    def getImage(self):
+        if len(self.translationArray)==0:
+            self.calculateDFA()
+        
+        g = Digraph('基于 LR(1)项目的 DFA图')
+        
+        # 添加结点
+        for index,item in enumerate(self.states):
+            
+            # 对item合并状态
+            newItem=[]
+            curItem=copy.deepcopy(item)
+            item=copy.deepcopy(item)
+            while len(item)>0:
+                result=[]
+                #print("itemwei",item[0][0],item[0][1],item[0][2])
+                basicLine=[item[0][0],item[0][1],item[0][2]]
+                for i in curItem:
+                    if i[0]==basicLine[0] and i[1]==basicLine[1] and i[2]==basicLine[2]:
+                        # 将item.index(i)移除
+                        result.append(i[3])
+                        item.remove(i)
+                
+                # 排序，按照字母顺序输出，这样好看
+                result.sort()
+                
+                # 将item整理成一个字符串
+                preStr=""
+                for kindex,kitem in enumerate(result):
+                    if kindex!=0:
+                        preStr+="|"
+                    preStr+=kitem
+                newItem.append([basicLine[0],basicLine[1],basicLine[2],preStr])
+            
+            showLabel=""
+            # str(index)+"     "
+            for j in newItem:
+                showLabel+=j[0]+"->"
+                for t in range(len(j[1])):
+                    if t==j[2]:
+                        showLabel+="·"
+                    showLabel+=j[1][t]
+                if j[2]>=len(j[1]):
+                    showLabel+="·"
+                
+                showLabel+=","+j[3]
+                
+                showLabel+="\l"
+            g.node(name=str(index),label=showLabel,xlabel=str(index),shape="box")
+        
+        # 添加边
+        for i in self.translationArray:
+            g.edge(str(i[0]),str(self.translationArray[(i[0],i[1])]),label=str(i[1]))
+        
+        g.view()
+
 if __name__=='__main__':
     #lr0=LR0()
     #lr0.calculateDFA()
+    #lr0.getImage()
     print("nio")
     lr1=LR1()
     lr1.calculateDFA()
+    lr1.getImage()
