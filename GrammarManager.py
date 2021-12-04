@@ -26,7 +26,7 @@ class GrammarManager:
             if "->" in sentence:
                 newSentence = sentence.split("->")
             elif "→" in sentence:
-                newSentence = sentence.split("->")
+                newSentence = sentence.split("→")
             else:
                 print(sentence)
                 print("error1")
@@ -38,6 +38,29 @@ class GrammarManager:
 
         # 计算终结符和非终结符
         self.calculateVTandVN()
+    
+    # 给定字符串
+    def getStr(self,sentences):
+        self.sentences=[]
+        for i in range(len(sentences)):
+            sentence=sentences[i]
+            # 去除空格、换行符
+            if "->" in sentence:
+                newSentence = sentence.split("->")
+            elif "→" in sentence:
+                newSentence = sentence.split("→")
+            else:
+                print(sentence)
+                print("error1")
+
+            # 对右侧|进行处理
+            sentenceRightSide = newSentence[1].split("|")
+            for i in sentenceRightSide:
+                self.sentences.append([newSentence[0], i])
+        
+        # 计算终结符和非终结符
+        self.calculateVTandVN()
+    
 
     '''
     计算终结符和非终结符
