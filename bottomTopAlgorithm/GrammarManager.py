@@ -7,14 +7,15 @@
 
 from stack import Stack
 
+
 class GrammarManager:
 
     def __init__(self):
         self.VT = []
         self.VN = []
         self.basicFirstSet = dict()
-        self.FIRSTVT=dict()
-        self.LASTVT=dict()
+        self.FIRSTVT = dict()
+        self.LASTVT = dict()
         print("初始化中")
 
     # 接受输入
@@ -23,7 +24,7 @@ class GrammarManager:
         self.sentences = []
 
         for i in range(sentenceNum):
-            sentence = input().replace(' ', '').replace('\n', '').replace('\r', '').replace("│","|")
+            sentence = input().replace(' ', '').replace('\n', '').replace('\r', '').replace("│", "|")
             # 去除空格、换行符
             if "->" in sentence:
                 newSentence = sentence.split("->")
@@ -33,10 +34,10 @@ class GrammarManager:
                 print(sentence)
                 print("error1")
                 raise Exception("不含分隔符")
-            
-            if len(newSentence[1])==0:
+
+            if len(newSentence[1]) == 0:
                 raise Exception("不含分隔符")
-            
+
             # 对右侧|进行处理
             sentenceRightSide = newSentence[1].split("|")
             for i in sentenceRightSide:
@@ -44,12 +45,12 @@ class GrammarManager:
 
         # 计算终结符和非终结符
         self.calculateVTandVN()
-    
+
     # 给定字符串
-    def getStr(self,sentences):
-        self.sentences=[]
+    def getStr(self, sentences):
+        self.sentences = []
         for i in range(len(sentences)):
-            sentence=sentences[i].replace("│","|").replace(' ', '').replace('\n', '').replace('\r', '')
+            sentence = sentences[i].replace("│", "|").replace(' ', '').replace('\n', '').replace('\r', '')
             # 去除空格、换行符
             if "->" in sentence:
                 newSentence = sentence.split("->")
@@ -59,18 +60,17 @@ class GrammarManager:
                 print(sentence)
                 print("error1")
                 raise Exception("不含分隔符")
-            
-            if len(newSentence[1])==0:
+
+            if len(newSentence[1]) == 0:
                 raise Exception("不含分隔符")
 
             # 对右侧|进行处理
             sentenceRightSide = newSentence[1].split("|")
             for i in sentenceRightSide:
                 self.sentences.append([newSentence[0], i])
-        
+
         # 计算终结符和非终结符
         self.calculateVTandVN()
-    
 
     '''
     计算终结符和非终结符
@@ -104,13 +104,11 @@ class GrammarManager:
                             if not self.sentences[i][j][k] in self.VT:
                                 self.VT.append(self.sentences[i][j][k])
 
-    
-    def isVT(self,c):
+    def isVT(self, c):
         return c in self.VT
-    
-    def isVN(self,c):
-        return c in self.VN
 
+    def isVN(self, c):
+        return c in self.VN
 
     '''
     计算基本First集合
@@ -198,12 +196,12 @@ class GrammarManager:
             if i in self.VT:
                 firstSet.add(i)
                 break
-            
+
             # 如果i为#，则表示到此为止
-            if i=="#":
+            if i == "#":
                 firstSet.add('#')
                 break
-            
+
             # 非终结符
             if i in self.VN:
                 # 将 self.basicFirstSet[i] 中除了 ε 都加入
@@ -212,26 +210,25 @@ class GrammarManager:
                         continue
                     else:
                         firstSet.add(j)
-                
+
                 # 如果没有ε，就不需要再算下去了
                 if not "ε" in self.basicFirstSet[i]:
                     break
-            
-            if i==initialState[-1]:
+
+            if i == initialState[-1]:
                 firstSet.add("ε")
 
         return firstSet
 
-
     '''
     为构造FIRSTVT与LASTVT使用的INSERT方法
-    '''    
-    def insertSymbolPair(self,nonTerminalIndex,terminalIndex,judgmentMatrix,symbolStack):
-        
+    '''
+
+    def insertSymbolPair(self, nonTerminalIndex, terminalIndex, judgmentMatrix, symbolStack):
+
         if not judgmentMatrix[nonTerminalIndex][terminalIndex]:
             judgmentMatrix[nonTerminalIndex][terminalIndex] = True
-            symbolStack.push([nonTerminalIndex,terminalIndex])
-
+            symbolStack.push([nonTerminalIndex, terminalIndex])
 
     '''
     计算非终结符对应的 FIRSTVT
@@ -239,72 +236,73 @@ class GrammarManager:
     FIRST choice 表示生成FIRSTVT
     LAST choice 表示生成LASTVT
     '''
+
     def getFirstVTorLastVT(self, choice):
-        
+
         # 检测是否有终结符与非终结符
         if len(self.VN) == 0 or len(self.VT) == 0:
             print("输入终结符或非终结符!")
             return
-        
+
         # 构造二维布尔矩阵F[P,a]和符号栈stack
         judgmentMatrix = [[False for i in range(len(self.VT))] for j in range(len(self.VN))]
         symbolStack = Stack()
-        
-        #接下来遍历sentences然后逐一进行处理入栈
-        for sentence in self.sentences: 
-            
-            #这里要先进行处理:
+
+        # 接下来遍历sentences然后逐一进行处理入栈
+        for sentence in self.sentences:
+
+            # 这里要先进行处理:
             if choice == "LAST":
                 tmp = sentence[1]
                 sentence[1] = tmp[:: -1]
-            
-            #先获取非终结符
-            nonTerminalIndex = self.VN.index(sentence[0])           
-            #对非终结符对应的语句进行处理
-            if len(sentence[1]) != 0:               
-                #获得首元素
-                firstSymbol = sentence[1][0]               
-                #如果首元素是终结符
-                if firstSymbol in self.VT:                   
-                    firstSymbolIndex = self.VT.index(firstSymbol)                   
-                    #修改矩阵并且插入到符号栈 对应 P->a...情况
-                    self.insertSymbolPair(nonTerminalIndex,firstSymbolIndex,judgmentMatrix,symbolStack)               
-                elif firstSymbol in self.VN:                   
-                    if len(sentence[1]) >= 2:                       
-                        secondSymbol = sentence[1][1]                       
-                        if secondSymbol in self.VT:                           
-                            secondSymbolIndex = self.VT.index(secondSymbol)                           
-                            #修改矩阵并插入到符号栈 对应P->Qa...的情况
-                            self.insertSymbolPair(nonTerminalIndex,secondSymbolIndex,judgmentMatrix,symbolStack)                   
+
+            # 先获取非终结符
+            nonTerminalIndex = self.VN.index(sentence[0])
+            # 对非终结符对应的语句进行处理
+            if len(sentence[1]) != 0:
+                # 获得首元素
+                firstSymbol = sentence[1][0]
+                # 如果首元素是终结符
+                if firstSymbol in self.VT:
+                    firstSymbolIndex = self.VT.index(firstSymbol)
+                    # 修改矩阵并且插入到符号栈 对应 P->a...情况
+                    self.insertSymbolPair(nonTerminalIndex, firstSymbolIndex, judgmentMatrix, symbolStack)
+                elif firstSymbol in self.VN:
+                    if len(sentence[1]) >= 2:
+                        secondSymbol = sentence[1][1]
+                        if secondSymbol in self.VT:
+                            secondSymbolIndex = self.VT.index(secondSymbol)
+                            # 修改矩阵并插入到符号栈 对应P->Qa...的情况
+                            self.insertSymbolPair(nonTerminalIndex, secondSymbolIndex, judgmentMatrix, symbolStack)
                 else:
                     raise Exception("生成FIRSTVT过程出现错误!")
-          
-        #循环处理Stack的过程
-        while not symbolStack.is_empty():           
-            #获得栈顶元素
+
+        # 循环处理Stack的过程
+        while not symbolStack.is_empty():
+            # 获得栈顶元素
             symbolPair = symbolStack.pop()
-            symbolPairNT = self.VN[symbolPair[0]]           
+            symbolPairNT = self.VN[symbolPair[0]]
             for s in self.sentences:
                 if choice == "LAST":
                     tmp = s[1]
                     s[1] = tmp[:: -1]
                 if len(s[1]) != 0 and s[1][0] == symbolPairNT:
-                    self.insertSymbolPair(self.VN.index(s[0]),symbolPair[1],judgmentMatrix,symbolStack)                  
-        #结束循环得到结果
-        result = {}     
-        for index,teminalList in enumerate(judgmentMatrix):
+                    self.insertSymbolPair(self.VN.index(s[0]), symbolPair[1], judgmentMatrix, symbolStack)
+                    # 结束循环得到结果
+        result = {}
+        for index, teminalList in enumerate(judgmentMatrix):
             VTs = []
-            for i,flag in enumerate(teminalList):
+            for i, flag in enumerate(teminalList):
                 if flag:
                     VTs.append(self.VT[i])
             result[self.VN[index]] = VTs
-            
+
         return result
 
     def getFirstAndLastVT(self):
-        
+
         self.FIRSTVT = self.getFirstVTorLastVT("FIRST")
-        
+
         self.LASTVT = self.getFirstVTorLastVT("LAST")
 
 
