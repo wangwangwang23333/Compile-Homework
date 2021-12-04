@@ -171,7 +171,7 @@ class LR0:
                     showLabel+=j[1][t]
                 if j[2]>=len(j[1]):
                     showLabel+="·"
-                showLabel+="\n"
+                showLabel+="\l"
             g.node(name=str(index),label=showLabel,xlabel=str(index),shape="box")
         
         # 添加边
@@ -377,7 +377,7 @@ class LR1:
                 
                 showLabel+=","+j[3]
                 
-                showLabel+="\n"
+                showLabel+="\l"
             g.node(name=str(index),label=showLabel,xlabel=str(index),shape="box")
         
         # 添加边
