@@ -5,7 +5,7 @@
 @author 1851055 汪明杰
 """
 
-from bottomTopAlgorithm.stack import Stack
+from stack import Stack
 
 class GrammarManager:
 
@@ -13,6 +13,8 @@ class GrammarManager:
         self.VT = []
         self.VN = []
         self.basicFirstSet = dict()
+        self.FIRSTVT=dict()
+        self.LASTVT=dict()
         print("初始化中")
 
     # 接受输入
@@ -101,6 +103,14 @@ class GrammarManager:
                         else:
                             if not self.sentences[i][j][k] in self.VT:
                                 self.VT.append(self.sentences[i][j][k])
+
+    
+    def isVT(self,c):
+        return c in self.VT
+    
+    def isVN(self,c):
+        return c in self.VN
+
 
     '''
     计算基本First集合
