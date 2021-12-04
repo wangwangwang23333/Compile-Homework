@@ -157,7 +157,12 @@ class GrammarManager:
             if i in self.VT:
                 firstSet.add(i)
                 break
-
+            
+            # 如果i为#，则表示到此为止
+            if i=="#":
+                firstSet.add('#')
+                break
+            
             # 非终结符
             if i in self.VN:
                 # 将 self.basicFirstSet[i] 中除了 ε 都加入
@@ -166,8 +171,12 @@ class GrammarManager:
                         continue
                     else:
                         firstSet.add(j)
-
-            if i == initialState[-1]:
+                
+                # 如果没有ε，就不需要再算下去了
+                if not "ε" in self.basicFirstSet[i]:
+                    break
+            
+            if i==initialState[-1]:
                 firstSet.add("ε")
 
         return firstSet
