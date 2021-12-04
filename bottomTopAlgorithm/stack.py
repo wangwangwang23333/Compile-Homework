@@ -5,6 +5,7 @@ stack using on the FIRSTVT/LASTVT
 @author: loey
 """
 
+
 class Stack(object):
     # 初始化栈为空列表
     def __init__(self):
