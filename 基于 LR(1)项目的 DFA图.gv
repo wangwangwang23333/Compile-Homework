@@ -1,0 +1,44 @@
+digraph "基于 LR(1)项目的 DFA图" {
+	0 [label="S'->·S,#
+S->·BB,#
+B->·aB,a|b
+B->·b,a|b
+" shape=box xlabel=0]
+	1 [label="B->a·B,a|b
+B->·aB,a|b
+B->·b,a|b
+" shape=box xlabel=1]
+	2 [label="B->b·,a|b
+" shape=box xlabel=2]
+	3 [label="S'->S·,#
+" shape=box xlabel=3]
+	4 [label="S->B·B,#
+B->·aB,#
+B->·b,#
+" shape=box xlabel=4]
+	5 [label="B->aB·,a|b
+" shape=box xlabel=5]
+	6 [label="B->a·B,#
+B->·aB,#
+B->·b,#
+" shape=box xlabel=6]
+	7 [label="B->b·,#
+" shape=box xlabel=7]
+	8 [label="S->BB·,#
+" shape=box xlabel=8]
+	9 [label="B->aB·,#
+" shape=box xlabel=9]
+	0 -> 1 [label=a]
+	0 -> 2 [label=b]
+	0 -> 3 [label=S]
+	0 -> 4 [label=B]
+	1 -> 1 [label=a]
+	1 -> 2 [label=b]
+	1 -> 5 [label=B]
+	4 -> 6 [label=a]
+	4 -> 7 [label=b]
+	4 -> 8 [label=B]
+	6 -> 6 [label=a]
+	6 -> 7 [label=b]
+	6 -> 9 [label=B]
+}
