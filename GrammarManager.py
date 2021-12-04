@@ -262,6 +262,7 @@ class GrammarManager:
     def getFirstAndLastVT(self):
         
         self.FIRSTVT = self.getFirstVTorLastVT("FIRST")
+        
         self.LASTVT = self.getFirstVTorLastVT("LAST")
 
 
