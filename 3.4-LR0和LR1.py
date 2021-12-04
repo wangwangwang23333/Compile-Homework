@@ -157,7 +157,7 @@ class LR0:
         if len(self.translationArray)==0:
             self.calculateDFA()
         
-        g = Digraph('基于 LR(0)项目的 DFA图')
+        g = Digraph('outputImage//基于 LR(0)项目的 DFA图')
         
         # 添加结点
         for index,item in enumerate(self.states):
@@ -334,7 +334,7 @@ class LR1:
         if len(self.translationArray)==0:
             self.calculateDFA()
         
-        g = Digraph('基于 LR(1)项目的 DFA图')
+        g = Digraph('outputImage//基于 LR(1)项目的 DFA图')
         
         # 添加结点
         for index,item in enumerate(self.states):
@@ -387,10 +387,10 @@ class LR1:
         g.view()
 
 if __name__=='__main__':
-    #lr0=LR0()
-    #lr0.calculateDFA()
-    #lr0.getImage()
+    lr0=LR0()
+    lr0.calculateDFA()
+    lr0.getImage()
     print("nio")
-    lr1=LR1()
-    lr1.calculateDFA()
-    lr1.getImage()
+    #lr1=LR1()
+    #lr1.calculateDFA()
+    #lr1.getImage()

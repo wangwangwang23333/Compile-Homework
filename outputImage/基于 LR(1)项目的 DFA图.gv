@@ -1,4 +1,4 @@
-digraph "基于 LR(1)项目的 DFA图" {
+digraph "outputImage//基于 LR(1)项目的 DFA图" {
 	0 [label="S'->·S,#\lS->·BB,#\lB->·aB,a|b\lB->·b,a|b\l" shape=box xlabel=0]
 	1 [label="B->a·B,a|b\lB->·aB,a|b\lB->·b,a|b\l" shape=box xlabel=1]
 	2 [label="B->b·,a|b\l" shape=box xlabel=2]
