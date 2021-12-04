@@ -78,14 +78,22 @@ class WidgetUI1(QWidget):
     
     
     def calculate(self):
-        g=GrammarManager()
+        self.outputArea.clear()
+        try:
+            g=GrammarManager()
         
-        res=self.te.toPlainText().split("\n")
-        g.getStr(res)
+            res=self.te.toPlainText().split("\n")
+            g.getStr(res)
 
-        g.getFirstAndLastVT()
-        self.outputArea.setText("FirstVT:\n"+str(g.FIRSTVT)+"\nLastVT:\n"+str(g.LASTVT))
-        print("res",res)
+            g.getFirstAndLastVT()
+            self.outputArea.setText("FirstVT:\n"+str(g.FIRSTVT)+"\nLastVT:\n"+str(g.LASTVT))
+            print("res",res)
+        except:
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("错误")
+            errorMessage.setText("输入有误，请检查您的输入！")
+            errorMessage.exec_()
+        
         return
 
     def getExample(self):

@@ -21,7 +21,7 @@ class GrammarManager:
         self.sentences = []
 
         for i in range(sentenceNum):
-            sentence = input().replace(' ', '').replace('\n', '').replace('\r', '')
+            sentence = input().replace(' ', '').replace('\n', '').replace('\r', '').replace("│","|")
             # 去除空格、换行符
             if "->" in sentence:
                 newSentence = sentence.split("->")
@@ -43,7 +43,7 @@ class GrammarManager:
     def getStr(self,sentences):
         self.sentences=[]
         for i in range(len(sentences)):
-            sentence=sentences[i]
+            sentence=sentences[i].replace("│","|").replace(' ', '').replace('\n', '').replace('\r', '')
             # 去除空格、换行符
             if "->" in sentence:
                 newSentence = sentence.split("->")
