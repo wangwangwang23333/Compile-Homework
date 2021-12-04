@@ -62,7 +62,7 @@ class LR0:
                 continue
             # 下一个字符
             if i[1][i[2]]==X:
-                if not listIsInLists([i[0],i[1],i[2]+1], result):
+                if not [i[0],i[1],i[2]+1] in result:
                     result.append([i[0],i[1],i[2]+1])
         # 对result中每一个表达式计算闭包
         newResult=result
@@ -100,7 +100,6 @@ class LR0:
                 for j in self.grammarManager.VT:
                     
                     newState=self.getGoIX(item,j)
-                    print("新状态为",newState)
                     
                     # 为空，则表示不可以接受该符号
                     if newState==[]:
@@ -158,9 +157,7 @@ class LR1:
         self.grammarManager=GrammarManager()
         self.grammarManager.getInput()
     
-    
-    
-    
+       
     def calculateDFA(self):
         # 初始状态
         initialRelation=[self.grammarManager.sentences[0][0],\
@@ -203,9 +200,21 @@ class LR1:
                         initialFirst+=res[3] # res[3]为预测符
                         
                         # 计算First(initialFirst)
+                        firstResultSet=self.grammarManager.getFirstSet(initialFirst)
                         
-                        
-            
+                        # firstSet中的终结符
+                        for vt in firstResultSet:
+                            # 如果不是终结符，则不考虑
+                            if not vt in self.grammarManager.VT:
+                                continue
+                            
+                            # 是终结符，则查看该结果是否已经出现过
+                            newRes=[rightSymbol,self.grammarManager[i][1],0,vt]
+                            
+                            if not newRes in result:
+                                result.append(newRes)
+                                newAppear=True
+        return result
     
 if __name__=='__main__':
     lr0=LR0()
