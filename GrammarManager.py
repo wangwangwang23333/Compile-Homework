@@ -30,7 +30,11 @@ class GrammarManager:
             else:
                 print(sentence)
                 print("error1")
-
+                raise Exception("不含分隔符")
+            
+            if len(newSentence[1])==0:
+                raise Exception("不含分隔符")
+            
             # 对右侧|进行处理
             sentenceRightSide = newSentence[1].split("|")
             for i in sentenceRightSide:
@@ -52,6 +56,10 @@ class GrammarManager:
             else:
                 print(sentence)
                 print("error1")
+                raise Exception("不含分隔符")
+            
+            if len(newSentence[1])==0:
+                raise Exception("不含分隔符")
 
             # 对右侧|进行处理
             sentenceRightSide = newSentence[1].split("|")
@@ -89,7 +97,7 @@ class GrammarManager:
                     else:
                         # 终结符
                         if self.sentences[i][j][k] == "'":
-                            print("error2")
+                            raise Exception("右侧不应该出现'")
                         else:
                             if not self.sentences[i][j][k] in self.VT:
                                 self.VT.append(self.sentences[i][j][k])
@@ -259,7 +267,8 @@ class GrammarManager:
                             #修改矩阵并插入到符号栈 对应P->Qa...的情况
                             self.insertSymbolPair(nonTerminalIndex,secondSymbolIndex,judgmentMatrix,symbolStack)                   
                 else:
-                    print("生成FIRSTVT过程出现错误!")           
+                    raise Exception("生成FIRSTVT过程出现错误!")
+          
         #循环处理Stack的过程
         while not symbolStack.is_empty():           
             #获得栈顶元素
