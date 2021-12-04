@@ -12,7 +12,7 @@ from PyQt5.Qt import *
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtCore import QRegExp
 
-from GrammarManager import GrammarManager
+from bottomTopAlgorithm.GrammarManager import GrammarManager
 
 class MainForm(QTabWidget):
     
