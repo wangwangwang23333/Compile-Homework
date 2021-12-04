@@ -1,0 +1,212 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Dec  3 00:32:19 2021
+
+@author: 1851055 汪明杰
+"""
+
+import copy
+
+
+from GrammarManager import GrammarManager
+    
+
+class LR0:
+    def __init__(self):
+        self.grammarManager=GrammarManager()
+        self.grammarManager.getInput()
+    
+    '''
+    计算initialRelation的闭包
+    '''
+    def getClosure(self,initialRelation):
+        
+        result=[initialRelation]
+    
+        # 闭包中的数量是否增加
+        newAppear=True
+        while newAppear:
+            newAppear=False
+            for res in result:
+                # 获取.右边的符号
+                if res[2]>=len(res[1]):
+                    continue
+                
+                rightSymbol=res[1][res[2]]
+                # 查看该符号是否出现在sentences中
+                for i in range(len(self.grammarManager.sentences)):
+                    if self.grammarManager.sentences[i][0]==rightSymbol:
+                        # 查看result中是否已经有该符号
+                        hasSymbol=False
+                        for j in result:
+                            if j[0]==self.grammarManager.sentences[i][0] and \
+                                j[1]==self.grammarManager.sentences[i][1] and \
+                                    j[2]==0:
+                                hasSymbol=True
+                                break
+                            
+                        # 如果该结果还没有出现在闭包中，则加入
+                        if not hasSymbol:
+                            result.append([self.grammarManager.sentences[i][0],\
+                                           self.grammarManager.sentences[i][1],0])
+                            newAppear=True
+        return result
+    
+    """
+    在状态I下接受符号X，所产生的[[]]
+    """                    
+    def getGoIX(self,I,X):
+        result=[]
+        for i in I:
+            if i[2]>=len(i[1]):
+                continue
+            # 下一个字符
+            if i[1][i[2]]==X:
+                if not listIsInLists([i[0],i[1],i[2]+1], result):
+                    result.append([i[0],i[1],i[2]+1])
+        # 对result中每一个表达式计算闭包
+        newResult=result
+        for i in result:
+            tempResults=self.getClosure(i)
+            # 对于tempResults中的每一个元素
+            for j in tempResults:
+                if not j in result:
+                    newResult.append(j)
+        return newResult
+    
+    
+    '''
+    计算DFA
+    '''
+    def calculateDFA(self):
+        # 每一个状态闭包，应当是一个集合
+        initialRelation=[self.grammarManager.sentences[0][0],\
+                         self.grammarManager.sentences[0][1],0]
+        initialState=self.getClosure(initialRelation)
+        
+        self.states=[initialState]
+        # 状态转移矩阵
+        self.translationArray=dict()
+        
+        # 从initialState开始扩展
+        hasGrown=True
+        while hasGrown:
+            hasGrown=False
+            newStates=copy.deepcopy(self.states)
+            
+            for i,item in enumerate(self.states):
+                
+                # 遍历终结符
+                for j in self.grammarManager.VT:
+                    
+                    newState=self.getGoIX(item,j)
+                    print("新状态为",newState)
+                    
+                    # 为空，则表示不可以接受该符号
+                    if newState==[]:
+                        continue
+                    
+                    # 判断新状态是否已经存在
+                    if newState in newStates:
+                        # 获取newState下标
+                        newStateIndex=newStates.index(newState)
+                        
+                        # 填充状态转移矩阵
+                        self.translationArray[(i,j)]=newStateIndex
+                    else:
+                        # 加入新状态
+                        newStates.append(newState)
+                        hasGrown=True
+                        
+                        # 填充状态转移矩阵
+                        self.translationArray[(i,j)]=len(newStates)-1
+                        
+                # 遍历非终结符
+                for j in self.grammarManager.VN:
+                    
+                    newState=self.getGoIX(item,j)
+                    
+                    # 为空，则表示不可以接受该符号
+                    if newState==[]:
+                        continue
+                    
+                    # 判断新状态是否已经存在
+                    if newState in newStates:
+                        # 获取newState下标
+                        newStateIndex=newStates.index(newState)
+                        
+                        # 填充状态转移矩阵
+                        self.translationArray[(i,j)]=newStateIndex
+                    else:
+                        # 加入新状态
+                        newStates.append(newState)
+                        hasGrown=True
+                        
+                        # 填充状态转移矩阵
+                        self.translationArray[(i,j)]=len(newStates)-1
+            
+            self.states=newStates
+
+
+"""
+绘图
+"""
+
+
+class LR1:
+    def __init__(self):
+        self.grammarManager=GrammarManager()
+        self.grammarManager.getInput()
+    
+    
+    
+    
+    def calculateDFA(self):
+        # 初始状态
+        initialRelation=[self.grammarManager.sentences[0][0],\
+                         self.grammarManager.sentences[0][1],0,'#']
+        
+        # 计算闭包
+        initialState=self.getClosure(initialRelation)
+        
+        self.states=[initialState]
+        # 状态转移矩阵
+        self.translationArray=dict()
+    
+    '''
+    计算initialRelation的闭包
+    '''
+    def getClosure(self,initialRelation):
+        
+        result=[initialRelation]
+    
+        # 闭包中的数量是否增加
+        newAppear=True
+        while newAppear:
+            newAppear=False
+            
+            for res in result:
+                # 获取.右边的符号
+                if res[2]>=len(res[1]):
+                    continue
+                rightSymbol=res[1][res[2]]
+                
+                # 查看是否有该产生式 rightSymbol-> xxx
+                for i in range(len(self.grammarManager.sentences)):
+                    if self.grammarManager.sentences[i][0]==rightSymbol:
+                        # rightSymbol-> self.grammarManager.sentences[i][1]
+                        
+                        # 接下来是确定 First(beta a),其中beta为再下一个字符
+                        initialFirst=""
+                        if res[2]+1<len(res[1]):
+                            initialFirst+=res[1][res[2]+1]
+                        initialFirst+=res[3] # res[3]为预测符
+                        
+                        # 计算First(initialFirst)
+                        
+                        
+            
+    
+if __name__=='__main__':
+    lr0=LR0()
+    lr0.calculateDFA()
