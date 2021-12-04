@@ -157,18 +157,6 @@ class LR1:
         self.grammarManager=GrammarManager()
         self.grammarManager.getInput()
     
-       
-    def calculateDFA(self):
-        # 初始状态
-        initialRelation=[self.grammarManager.sentences[0][0],\
-                         self.grammarManager.sentences[0][1],0,'#']
-        
-        # 计算闭包
-        initialState=self.getClosure(initialRelation)
-        
-        self.states=[initialState]
-        # 状态转移矩阵
-        self.translationArray=dict()
     
     '''
     计算initialRelation的闭包
@@ -176,7 +164,7 @@ class LR1:
     def getClosure(self,initialRelation):
         
         result=[initialRelation]
-    
+        
         # 闭包中的数量是否增加
         newAppear=True
         while newAppear:
@@ -192,30 +180,127 @@ class LR1:
                 for i in range(len(self.grammarManager.sentences)):
                     if self.grammarManager.sentences[i][0]==rightSymbol:
                         # rightSymbol-> self.grammarManager.sentences[i][1]
-                        
                         # 接下来是确定 First(beta a),其中beta为再下一个字符
                         initialFirst=""
                         if res[2]+1<len(res[1]):
                             initialFirst+=res[1][res[2]+1]
                         initialFirst+=res[3] # res[3]为预测符
-                        
+                        print("initialFirst为",initialFirst)
                         # 计算First(initialFirst)
                         firstResultSet=self.grammarManager.getFirstSet(initialFirst)
                         
+                        print("firstResultSet为",firstResultSet)
+                        
                         # firstSet中的终结符
                         for vt in firstResultSet:
-                            # 如果不是终结符，则不考虑
-                            if not vt in self.grammarManager.VT:
+                            # 如果不是终结符或者#，则不考虑
+                            if not (vt in self.grammarManager.VT or vt=='#'):
                                 continue
                             
                             # 是终结符，则查看该结果是否已经出现过
-                            newRes=[rightSymbol,self.grammarManager[i][1],0,vt]
+                            newRes=[rightSymbol,self.grammarManager.sentences[i][1],0,vt]
                             
                             if not newRes in result:
                                 result.append(newRes)
                                 newAppear=True
         return result
     
+    '''
+    计算Go(I,X):即在状态I下接受输入X
+    '''
+    def getGoIX(self,I,X):
+        result=[]
+        for i in I:
+            if i[2]>=len(i[1]):
+                continue
+            # 下一个字符
+            if i[1][i[2]]==X:
+                if not [i[0],i[1],i[2]+1,i[3]] in result:
+                    result.append([i[0],i[1],i[2]+1,i[3]])
+        # 对result中每一个表达式计算闭包
+        newResult=result
+        for i in result:
+            tempResults=self.getClosure(i)
+            # 对于tempResults中的每一个元素
+            for j in tempResults:
+                if not j in result:
+                    newResult.append(j)
+        return newResult
+    
+    '''
+    计算DFA
+    '''
+    def calculateDFA(self):
+        # 每一个状态闭包，应当是一个集合
+        initialRelation=[self.grammarManager.sentences[0][0],\
+                         self.grammarManager.sentences[0][1],0,'#']
+        initialState=self.getClosure(initialRelation)
+        
+        self.states=[initialState]
+        # 状态转移矩阵
+        self.translationArray=dict()
+        
+        # 从initialState开始扩展
+        hasGrown=True
+        while hasGrown:
+            hasGrown=False
+            newStates=copy.deepcopy(self.states)
+            
+            for i,item in enumerate(self.states):
+                
+                # 遍历终结符
+                for j in self.grammarManager.VT:
+                    
+                    newState=self.getGoIX(item,j)
+                    
+                    # 为空，则表示不可以接受该符号
+                    if newState==[]:
+                        continue
+                    
+                    # 判断新状态是否已经存在
+                    if newState in newStates:
+                        # 获取newState下标
+                        newStateIndex=newStates.index(newState)
+                        
+                        # 填充状态转移矩阵
+                        self.translationArray[(i,j)]=newStateIndex
+                    else:
+                        # 加入新状态
+                        newStates.append(newState)
+                        hasGrown=True
+                        
+                        # 填充状态转移矩阵
+                        self.translationArray[(i,j)]=len(newStates)-1
+                        
+                # 遍历非终结符
+                for j in self.grammarManager.VN:
+                    
+                    newState=self.getGoIX(item,j)
+                    
+                    # 为空，则表示不可以接受该符号
+                    if newState==[]:
+                        continue
+                    
+                    # 判断新状态是否已经存在
+                    if newState in newStates:
+                        # 获取newState下标
+                        newStateIndex=newStates.index(newState)
+                        
+                        # 填充状态转移矩阵
+                        self.translationArray[(i,j)]=newStateIndex
+                    else:
+                        # 加入新状态
+                        newStates.append(newState)
+                        hasGrown=True
+                        
+                        # 填充状态转移矩阵
+                        self.translationArray[(i,j)]=len(newStates)-1
+            
+            self.states=newStates
+    
 if __name__=='__main__':
-    lr0=LR0()
-    lr0.calculateDFA()
+    #lr0=LR0()
+    #lr0.calculateDFA()
+    print("nio")
+    lr1=LR1()
+    lr1.calculateDFA()
