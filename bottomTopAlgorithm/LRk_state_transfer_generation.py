@@ -251,7 +251,11 @@ class LR1:
             # 下一个字符
             if i[1][i[2]] == X:
                 if not [i[0], i[1], i[2] + 1, i[3]] in result:
-                    result.append([i[0], i[1], i[2] + 1, i[3]])
+                    state_item = [i[0], i[1], i[2] + 1, i[3]]
+                    if state_item[2] == len(state_item[1]):
+                        # 如果是规约项的话，就增加第五个元素表示规约项
+                        state_item.append(self.grammarManager.get_number_of_sentence(state_item))
+                    result.append(state_item)
         # 对result中每一个表达式计算闭包
         newResult = result
         for i in result:
@@ -269,6 +273,7 @@ class LR1:
     2. 产生式右部
     3. 当前接受位置
     4. 当前状态式接受字符
+    5. 可能有的项，表示规约产生式的编号
     Example: E->a·B, # 对应的四元组为["E","aB",1,'#']
     备注：为了方便使用，在这里一个四元组的展望符只能是一个字符
     因此， E->a·B, #|a 被存为两个四元组：["E","aB",1,'#']和["E","aB",1,'a']
@@ -276,7 +281,7 @@ class LR1:
 
     def calculateDFA(self):
         # 每一个状态闭包，应当是一个集合
-        initialRelation = [self.grammarManager.sentences[0][0], \
+        initialRelation = [self.grammarManager.sentences[0][0],
                            self.grammarManager.sentences[0][1], 0, '#']
         initialState = self.getClosure(initialRelation)
 
@@ -357,10 +362,16 @@ class LR1:
             while len(item) >0:
                 result = []
                 basic_line = [item[0][0], item[0][1], item[0][2]]
+                # 有可能是规约项，有第五个元素
+                if len(item[0]) > 4:
+                    basic_line.append(item[0][4])
                 for i in cur_item:
                     if i[0] == basic_line[0] and i[1] == basic_line[1] and i[2] == basic_line[2]:
                         # 将item.index(i)移除
                         result.append(i[3])
+                        # 有可能是规约项，有第五个元素
+                        if len(i) > 4:
+                            basic_line.append(i[4])
                         item.remove(i)
 
                 # 排序，按照字母顺序输出，这样好看
@@ -370,7 +381,10 @@ class LR1:
                 looking_forwards = []
                 for kindex, kitem in enumerate(result):
                     looking_forwards.append(kitem)
-                new_item.append([basic_line[0], basic_line[1], basic_line[2], looking_forwards])
+                state_item = [basic_line[0], basic_line[1], basic_line[2], looking_forwards]
+                if len(basic_line) > 3:
+                    state_item.append(basic_line[3])
+                new_item.append(state_item)
             new_states.append(new_item)
         # print(new_states)
         # self.states = new_states
@@ -439,6 +453,14 @@ class LR1:
 
 
 if __name__ == '__main__':
+    """
+    测试：
+4
+S'->S
+S->BB
+B->aB
+B->b
+    """
     #lr0 = LR1()
     #lr0.calculateDFA()
     #lr0.getImage()
@@ -449,4 +471,4 @@ if __name__ == '__main__':
     lr1.calculateDFA()
     lr1.getImage()
     print(lr1.states)
-    lr1.merge_looking_forward_string()
+    print(lr1.merge_looking_forward_string())

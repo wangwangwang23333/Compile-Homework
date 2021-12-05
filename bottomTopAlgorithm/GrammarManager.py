@@ -316,8 +316,8 @@ class GrammarManager:
         s = [sentence[0], sentence[1]]
         if s not in self.sentences:
             raise Exception("不存在的产生式")
-        # +1，从1开始
-        return self.sentences.index(s)+1
+        # 从0开始，本身就是数组下标
+        return self.sentences.index(s)
 
 
 if __name__ == '__main__':
