@@ -67,6 +67,10 @@ class LR1Table:
         return self.action, self.goto
 
     def get_visible_table(self):
+        """
+        把 dict 转化成跟题中一样的表格，存在 list 里
+        :return: 一个二维数组
+        """
         rows = len(self.lr1.get_merged_looking_forward_string())
         table = []
 
@@ -92,6 +96,10 @@ class LR1Table:
         return table
 
     def show(self):
+        """
+        打印出来
+        :return: None
+        """
         for i in self.get_visible_table():
             for j in i:
                 if j is not None:
@@ -101,6 +109,11 @@ class LR1Table:
             print()
 
     def _get_index_of_v(self, v):
+        """
+        就是要转化数组的时候用的私有函数。
+        :param v: 一个符号
+        :return: 这个符号所在的表格中的列
+        """
         if v.isupper():
             return self.table_VN.index(v) + len(self.table_VT) + 1
         return self.table_VT.index(v) + 1
