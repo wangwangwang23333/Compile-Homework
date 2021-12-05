@@ -404,12 +404,12 @@ class LR1:
 
 
 if __name__ == '__main__':
-    lr0 = LR1()
-    lr0.calculateDFA()
-    lr0.getImage()
-    print(lr0.translationArray)
-    print(lr0.states)
+    #lr0 = LR1()
+    #lr0.calculateDFA()
+    #lr0.getImage()
+    #print(lr0.translationArray)
+    #print(lr0.states)
     print("nio")
-    # lr1=LR1()
-    # lr1.calculateDFA()
-    # lr1.getImage()
+    lr1=LR1()
+    lr1.calculateDFA()
+    lr1.getImage()
