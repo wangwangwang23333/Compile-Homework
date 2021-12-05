@@ -219,11 +219,11 @@ class LR1:
                         if res[2] + 1 < len(res[1]):
                             initialFirst += res[1][res[2] + 1]
                         initialFirst += res[3]  # res[3]为预测符
-                        print("initialFirst为", initialFirst)
+                        # print("initialFirst为", initialFirst)
                         # 计算First(initialFirst)
                         firstResultSet = self.grammarManager.getFirstSet(initialFirst)
 
-                        print("firstResultSet为", firstResultSet)
+                        # print("firstResultSet为", firstResultSet)
 
                         # firstSet中的终结符
                         for vt in firstResultSet:
@@ -475,6 +475,11 @@ S'->S
 S->BB
 B->aB
 B->b
+
+3
+E'->E
+E->(E)
+E->i
     """
     #lr0 = LR1()
     #lr0.calculateDFA()
@@ -488,3 +493,5 @@ B->b
     print(lr1.states)
     print(lr1.get_merged_looking_forward_string())
     print(lr1.get_numbered_and_looking_forward_transfer_array())
+    print(lr1.translationArray)
+
