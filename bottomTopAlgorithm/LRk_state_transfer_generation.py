@@ -219,11 +219,11 @@ class LR1:
                         if res[2] + 1 < len(res[1]):
                             initialFirst += res[1][res[2] + 1]
                         initialFirst += res[3]  # res[3]为预测符
-                        print("initialFirst为", initialFirst)
+                        # print("initialFirst为", initialFirst)
                         # 计算First(initialFirst)
                         firstResultSet = self.grammarManager.getFirstSet(initialFirst)
 
-                        print("firstResultSet为", firstResultSet)
+                        # print("firstResultSet为", firstResultSet)
 
                         # firstSet中的终结符
                         for vt in firstResultSet:
@@ -251,7 +251,11 @@ class LR1:
             # 下一个字符
             if i[1][i[2]] == X:
                 if not [i[0], i[1], i[2] + 1, i[3]] in result:
-                    result.append([i[0], i[1], i[2] + 1, i[3]])
+                    state_item = [i[0], i[1], i[2] + 1, i[3]]
+                    if state_item[2] == len(state_item[1]):
+                        # 如果是规约项的话，就增加第五个元素表示规约项
+                        state_item.append(self.grammarManager.get_number_of_sentence(state_item))
+                    result.append(state_item)
         # 对result中每一个表达式计算闭包
         newResult = result
         for i in result:
@@ -269,14 +273,16 @@ class LR1:
     2. 产生式右部
     3. 当前接受位置
     4. 当前状态式接受字符
+    5. 可能有的项，表示规约产生式的编号
     Example: E->a·B, # 对应的四元组为["E","aB",1,'#']
     备注：为了方便使用，在这里一个四元组的展望符只能是一个字符
     因此， E->a·B, #|a 被存为两个四元组：["E","aB",1,'#']和["E","aB",1,'a']
+    如果这个状态项将要被规约，则是一个五元组：["E","aB",1,'#',1] 最后一个数字表示规约的产生式的编号
     '''
 
     def calculateDFA(self):
         # 每一个状态闭包，应当是一个集合
-        initialRelation = [self.grammarManager.sentences[0][0], \
+        initialRelation = [self.grammarManager.sentences[0][0],
                            self.grammarManager.sentences[0][1], 0, '#']
         initialState = self.getClosure(initialRelation)
 
@@ -342,6 +348,65 @@ class LR1:
 
             self.states = newStates
 
+    def get_merged_looking_forward_string(self):
+        """
+        通过这个函数将LR1状态转移矩阵的展望符合并。合并后的 state 四元组：
+        [左部, 右部, 当前位置, [展望符列表]]
+        :return: 一个合并过的状态 DFA
+        """
+        # print(self.states)
+        new_states = []
+        for index, item in enumerate(self.states):
+            new_item = []
+            cur_item = copy.deepcopy(item)
+            item = copy.deepcopy(item)
+            while len(item) >0:
+                result = []
+                basic_line = [item[0][0], item[0][1], item[0][2]]
+                # 有可能是规约项，有第五个元素
+                if len(item[0]) > 4:
+                    basic_line.append(item[0][4])
+                for i in cur_item:
+                    if i[0] == basic_line[0] and i[1] == basic_line[1] and i[2] == basic_line[2]:
+                        # 将item.index(i)移除
+                        result.append(i[3])
+                        # 有可能是规约项，有第五个元素
+                        if len(i) > 4:
+                            basic_line.append(i[4])
+                        item.remove(i)
+
+                # 排序，按照字母顺序输出，这样好看
+                result.sort()
+
+                # 将item整理成一个数组
+                looking_forwards = []
+                for kindex, kitem in enumerate(result):
+                    looking_forwards.append(kitem)
+                state_item = [basic_line[0], basic_line[1], basic_line[2], looking_forwards]
+                if len(basic_line) > 3:
+                    state_item.append(basic_line[3])
+                new_item.append(state_item)
+            new_states.append(new_item)
+        # print(new_states)
+        # self.states = new_states
+        # 这里可以选直接覆盖原来的 states 或者返回一个处理好的 states，看需求吧
+        return new_states
+
+    def get_numbered_and_looking_forward_transfer_array(self):
+        """
+        在 state transfer array 里添加规约项标号和展望符，满足 3.7，3.8 的输入格式
+        :return: 新的状态转移矩阵
+        """
+        new_transfer_array = copy.deepcopy(self.translationArray)
+        merged_states = self.get_merged_looking_forward_string()
+        for index, state in enumerate(merged_states):
+            for state_item in state:
+                if len(state_item) > 4:
+                    new_transfer_array[(index, "no")] = state_item[4]
+                    new_transfer_array[(index, "lft")] = state_item[3]
+
+        return new_transfer_array
+
     """
     绘图
     """
@@ -404,6 +469,19 @@ class LR1:
 
 
 if __name__ == '__main__':
+    """
+    测试：
+4
+S'->S
+S->BB
+B->aB
+B->b
+
+3
+E'->E
+E->(E)
+E->i
+    """
     #lr0 = LR1()
     #lr0.calculateDFA()
     #lr0.getImage()
@@ -413,3 +491,8 @@ if __name__ == '__main__':
     lr1=LR1()
     lr1.calculateDFA()
     lr1.getImage()
+    print(lr1.states)
+    print(lr1.get_merged_looking_forward_string())
+    print(lr1.get_numbered_and_looking_forward_transfer_array())
+    print(lr1.translationArray)
+

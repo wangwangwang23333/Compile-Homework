@@ -1,200 +1,139 @@
-from bottomTopAlgorithm.GrammarManager import GrammarManager
+from bottomTopAlgorithm.LRk_state_transfer_generation import LR1
 import copy
 
 
-# 想用这种办法重构代码，这样比较可拓展
-class StateItem:
+class Action:
     """
-    一个 LR1 DFA 当中的产生式状态，有很多个属性：
-    1. 产生式左部
-    2. 产生式右部
-    3. 当前接受位置
-    4. 当前状态式接受字符
-    5. 规约所属表达式编号
-    6. 展望符
+    对应 Action 表中的 action
     """
 
-    def __init__(self, left, right, pos, acc, no=None, looking=None):
-        self.left_side = left
-        self.right_side = right
-        self.position = pos
-        self.accept = acc
-        self.number = no
-        self.looking_forward = looking
-        if len(self.right_side) <= self.position:
-            raise Exception("接受位错误，超出产生式本身")
-
-    def __str__(self):
-        s = ""
-        s += self.left_side
-        s += '->' + self.right_side[0:self.position] + '·' + self.right_side[self.position:len(self.right_side)]
-        s += ", " + self.accept
-        s += "; " + "(No. " + str(self.number) + "; "
-        for i in self.looking_forward:
-            s += i + ', '
-        s += ')'
-        return s
+    def __init__(self, state, act="shift"):
+        self.state = state
+        self.action = act
+        if not self.action.startswith("s") and not self.action.startswith("r") and not self.action.startswith("a"):
+            raise Exception("没有这样的动作" + act)
 
     def __repr__(self):
-        return str(self)
-
-
-class LR1LookingForward:
-    """
-    从汪明杰的文件里 Copy 过来的。
-    TODO： 在 state_transfer_array 中添加 No. 和 展望符
-    """
-
-    def __init__(self):
-        self.state_transfer_array = dict()
-        self.states = dict()
-        self.grammarManager = GrammarManager()
-        self.grammarManager.getInput()
-
-    def get_closure(self, initial_relation):
-        """
-        计算initialRelation的闭包
-        """
-        result = [initial_relation]
-
-        # 闭包中的数量是否增加
-        new_appear = True
-        while new_appear:
-            new_appear = False
-
-            for res in result:
-                # 获取.右边的符号
-                if res[2] >= len(res[1]):
-                    continue
-                right_symbol = res[1][res[2]]
-
-                # 查看是否有该产生式 right_symbol-> xxx
-                for i in range(len(self.grammarManager.sentences)):
-                    if self.grammarManager.sentences[i][0] == right_symbol:
-                        # right_symbol-> self.grammarManager.sentences[i][1]
-                        # 接下来是确定 First(beta a),其中beta为再下一个字符
-                        initial_first = ""
-                        if res[2] + 1 < len(res[1]):
-                            initial_first += res[1][res[2] + 1]
-                        initial_first += res[3]  # res[3]为预测符
-                        print("initialFirst为", initial_first)
-                        # 计算First(initial_first)
-                        first_result_set = self.grammarManager.getFirstSet(initial_first)
-
-                        print("firstResultSet为", first_result_set)
-
-                        # firstSet中的终结符
-                        for vt in first_result_set:
-                            # 如果不是终结符或者#，则不考虑
-                            if not (vt in self.grammarManager.VT or vt == '#'):
-                                continue
-
-                            # 是终结符，则查看该结果是否已经出现过
-                            newRes = [right_symbol, self.grammarManager.sentences[i][1], 0, vt]
-
-                            if not newRes in result:
-                                result.append(newRes)
-                                new_appear = True
-        return result
-
-    def get_go_IX(self, I, X):
-        """
-        计算Go(I,X):即在状态I下接受输入X
-        """
-        result = []
-        for i in I:
-            if i[2] >= len(i[1]):
-                continue
-            # 下一个字符
-            if i[1][i[2]] == X:
-                if not [i[0], i[1], i[2] + 1, i[3]] in result:
-                    result.append([i[0], i[1], i[2] + 1, i[3]])
-        # 对result中每一个表达式计算闭包
-        new_result = result
-        for i in result:
-            tempResults = self.get_closure(i)
-            # 对于tempResults中的每一个元素
-            for j in tempResults:
-                if not j in result:
-                    new_result.append(j)
-        return new_result
-
-    def calculate_DFA(self):
-        """
-        计算DFA
-        """
-        # 每一个状态闭包，应当是一个集合
-        initial_relation = [self.grammarManager.sentences[0][0],
-                            self.grammarManager.sentences[0][1], 0, '#']
-        initial_state = self.get_closure(initial_relation)
-
-        self.states = [initial_state]
-
-        # 从initialState开始扩展
-        has_grown = True
-        while has_grown:
-            has_grown = False
-            newStates = copy.deepcopy(self.states)
-
-            for i, item in enumerate(self.states):
-
-                # 遍历终结符
-                for j in self.grammarManager.VT:
-
-                    new_state = self.get_go_IX(item, j)
-
-                    # 为空，则表示不可以接受该符号
-                    if new_state == []:
-                        continue
-
-                    # 判断新状态是否已经存在
-                    if new_state in newStates:
-                        # 获取newState下标
-                        new_state_index = newStates.index(new_state)
-
-                        # 填充状态转移矩阵
-                        self.state_transfer_array[(i, j)] = new_state_index
-                    else:
-                        # 加入新状态
-                        newStates.append(new_state)
-                        has_grown = True
-
-                        # 填充状态转移矩阵
-                        self.state_transfer_array[(i, j)] = len(newStates) - 1
-
-                # 遍历非终结符
-                for j in self.grammarManager.VN:
-
-                    new_state = self.get_go_IX(item, j)
-
-                    # 为空，则表示不可以接受该符号
-                    if new_state == []:
-                        continue
-
-                    # 判断新状态是否已经存在
-                    if new_state in newStates:
-                        # 获取newState下标
-                        new_state_index = newStates.index(new_state)
-
-                        # 填充状态转移矩阵
-                        self.state_transfer_array[(i, j)] = new_state_index
-                    else:
-                        # 加入新状态
-                        newStates.append(new_state)
-                        has_grown = True
-
-                        # 填充状态转移矩阵
-                        self.state_transfer_array[(i, j)] = len(newStates) - 1
-
-            self.states = newStates
+        if self.action.startswith("a"):
+            return "acc"
+        return self.action[0] + str(self.state)
 
 
 class LR1Table:
+    """
+    LR1 分析表构造类
+    通过
+    """
 
     def __init__(self):
-        self.lr1 = LR1LookingForward()
+        self.lr1 = LR1()
+        self.lr1.calculateDFA()
+        self.state_transfer_array = self.lr1.get_numbered_and_looking_forward_transfer_array()
+        self.action = dict()
+        self.goto = dict()
+        self.get_analysis_table()
+
+        # 为了打印表格的变量
+        self.table_VN = copy.deepcopy(self.lr1.grammarManager.VN)
+        self.table_VT = copy.deepcopy(self.lr1.grammarManager.VT)
+        # VT 含有 #
+        self.table_VT.append("#")
+        # 跳过 S'
+        for i in self.table_VN:
+            if len(i) > 1:
+                self.table_VN.remove(i)
+
+    def get_analysis_table(self):
+        """
+        返回LR(1) 算法分析表。
+        一个元组，(action表, goto表)
+        :return: (action表, goto表)
+        """
+        for pos, state in self.state_transfer_array.items():
+            if len(pos[1]) > 1 and pos[1][1] == "'":
+                self.action[pos] = Action(0, 'acc')
+            elif pos[1] in self.lr1.grammarManager.VT:
+                self.action[pos] = Action(state, "shift")
+            elif pos[1] in self.lr1.grammarManager.VN:
+                self.goto[pos] = state
+            elif pos[1] == "no":
+                row = pos[0]
+                lft = self.state_transfer_array[(row, "lft")]
+                for s in lft:
+                    if len(self.lr1.grammarManager.sentences[state][0]) == 1:
+                        self.action[(row, s)] = Action(state, "reduce")
+                    else:
+                        self.action[(row, s)] = Action(0, "acc")
+        return self.action, self.goto
+
+    def get_visible_table(self):
+        """
+        把 dict 转化成跟题中一样的表格，存在 list 里
+        :return: 一个二维数组
+        """
+        rows = len(self.lr1.get_merged_looking_forward_string())
+        table = []
+
+        nVT = len(self.table_VT)
+        nVN = len(self.table_VN)
+        # 生成全是 None 的表
+        for i in range(rows+1):
+            table.append([None]*(nVT + nVN + 1))
+        # 第一列是序号
+        for i in range(1, rows+1):
+            table[i][0] = i-1
+        # 第一行是符号
+        for i in range(nVN + nVT):
+            if i < nVT:
+                table[0][i+1] = self.table_VT[i]
+            else:
+                table[0][i+1] = self.table_VN[i-nVT]
+        for pos, item in self.action.items():
+            table[pos[0]+1][self._get_index_of_v(pos[1])] = item
+        for pos, item in self.goto.items():
+            table[pos[0]+1][self._get_index_of_v(pos[1])] = item
+
+        return table
+
+    def show(self):
+        """
+        打印出来
+        :return: None
+        """
+        for i in self.get_visible_table():
+            for j in i:
+                if j is not None:
+                    print(j, '\t', end="")
+                else:
+                    print('\t', end="")
+            print()
+
+    def _get_index_of_v(self, v):
+        """
+        就是要转化数组的时候用的私有函数。
+        :param v: 一个符号
+        :return: 这个符号所在的表格中的列
+        """
+        if v.isupper():
+            return self.table_VN.index(v) + len(self.table_VT) + 1
+        return self.table_VT.index(v) + 1
 
 
+"""
+测试：
+4
+S'->S
+S->BB
+B->aB
+B->b
+
+3
+E'->E
+E->(E)
+E->i
+"""
 if __name__ == "__main__":
-    s = StateItem("E'", "E", 1, "#", 3, ['#', '&'])
-    print(s)
+    print("Hello World")
+    table = LR1Table()
+    table.show()
+
