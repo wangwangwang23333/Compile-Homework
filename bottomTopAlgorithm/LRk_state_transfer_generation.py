@@ -347,7 +347,7 @@ class LR1:
 
             self.states = newStates
 
-    def merge_looking_forward_string(self):
+    def get_merged_looking_forward_string(self):
         """
         通过这个函数将LR1状态转移矩阵的展望符合并。合并后的 state 四元组：
         [左部, 右部, 当前位置, [展望符列表]]
@@ -390,6 +390,21 @@ class LR1:
         # self.states = new_states
         # 这里可以选直接覆盖原来的 states 或者返回一个处理好的 states，看需求吧
         return new_states
+
+    def get_numbered_and_looking_forward_transfer_array(self):
+        """
+        在 state transfer array 里添加规约项标号和展望符，满足 3.7，3.8 的输入格式
+        :return: 新的状态转移矩阵
+        """
+        new_transfer_array = copy.deepcopy(self.translationArray)
+        merged_states = self.get_merged_looking_forward_string()
+        for index, state in enumerate(merged_states):
+            for state_item in state:
+                if len(state_item) > 4:
+                    new_transfer_array[(index, "no")] = state_item[4]
+                    new_transfer_array[(index, "lft")] = state_item[3]
+
+        return new_transfer_array
 
     """
     绘图
@@ -471,4 +486,5 @@ B->b
     lr1.calculateDFA()
     lr1.getImage()
     print(lr1.states)
-    print(lr1.merge_looking_forward_string())
+    print(lr1.get_merged_looking_forward_string())
+    print(lr1.get_numbered_and_looking_forward_transfer_array())
