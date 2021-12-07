@@ -333,8 +333,7 @@ class WidgetUI4(QWidget):
             self.imageLabel.setPixmap(DFAImage)
             
             
-        except error:
-            print(error)
+        except:
             errorMessage=QMessageBox()
             errorMessage.setWindowTitle("错误")
             errorMessage.setText("输入有误，请检查您的输入！")
@@ -357,6 +356,58 @@ class WidgetUI5(QWidget):
     def __init__(self):
         super().__init__()
 
+        # 文法输入框
+        self.te = QTextEdit()
+        self.te.setPlaceholderText("在此输入文法规则")
+        self.te.setFontFamily("幼圆")
+        self.te.setFontPointSize(20)
+
+        # 计算按钮
+        self.dealButton=QPushButton(self)
+        self.dealButton.setText("构造LR(0)分析表")
+        self.dealButton.clicked.connect(self.calculate)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.dealButton.setToolTip("根据识别文法活前缀的 DFA 构造 LR(0)分析表")
+        self.dealButton.resize(self.dealButton.sizeHint())
+        # 范例按钮
+        self.exampleButton=QPushButton(self)
+        self.exampleButton.setText("范例")
+        self.exampleButton.clicked.connect(self.getExample)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.exampleButton.setToolTip("为了便于测试，我们准备了一个范例")
+        self.exampleButton.resize(self.exampleButton.sizeHint())
+
+        vLayout=QVBoxLayout()
+        vLayout.addWidget(self.te)
+        vLayout.addWidget(self.dealButton)
+        vLayout.addWidget(self.exampleButton)
+   
+        hLayout=QHBoxLayout()
+        hLayout.addLayout(vLayout)
+
+        # 右侧是表格
+        self.tableView=QTableView()
+        #水平方向，表格大小拓展到适当的尺寸
+        self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableView.horizontalHeader().setStretchLastSection(True)
+
+        hLayout.addWidget(self.tableView)
+
+        self.setLayout(hLayout)
+
+
+    def calculate(self):
+        try:
+            res = self.te.toPlainText().split("\n")
+        except:
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("错误")
+            errorMessage.setText("输入有误，请检查您的输入！")
+            errorMessage.exec_()
+
+    def getExample(self):
+        self.te.setText("E' → E\nE->(E)\nE->i")
 
 class WidgetUI6(QWidget):
     def __init__(self):
