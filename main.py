@@ -226,10 +226,15 @@ class WidgetUI4(QWidget):
         self.tableView.horizontalHeader().setStretchLastSection(True)
         
         # 展示图片
+        self.imageLabel = QLabel()
+        self.imageLabel.setText(" ")
+        self.imageLabel.setFixedHeight(500)
+        self.g=None
 
         vLayout1.addWidget(self.tableView)
-        hLayout1.addLayout(vLayout1)
         
+        hLayout1.addLayout(vLayout1)
+        hLayout1.addWidget(self.imageLabel)
 
         vLayout2=QHBoxLayout()
         # 计算按钮
@@ -246,14 +251,24 @@ class WidgetUI4(QWidget):
         QToolTip.setFont(QFont('SansSerif', 15))
         self.exampleButton.setToolTip("为了便于测试，我们准备了一个范例")
         self.exampleButton.resize(self.exampleButton.sizeHint())
+        # 保存图片
+        self.saveButton=QPushButton(self)
+        self.saveButton.setText("保存图片")
+        self.saveButton.clicked.connect(self.saveImage)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.saveButton.setToolTip("您可以保存生成的DFA图")
+        self.saveButton.resize(self.saveButton.sizeHint())
+        
 
         vLayout2.addWidget(self.dealButton)
         vLayout2.addWidget(self.exampleButton)
+        vLayout2.addWidget(self.saveButton)
 
         hLayout2=QVBoxLayout()
         hLayout2.addLayout(hLayout1)
         hLayout2.addLayout(vLayout2)
-        
+
+
         
         self.setLayout(hLayout2)
 
@@ -298,17 +313,34 @@ class WidgetUI4(QWidget):
                         item=QStandardItem(' ')
                     self.model.setItem(row,column,item)
             
-
-            lr0.getImage()
+            baseUrl,self.g=lr0.getImage()
+            baseUrl="outputImage//"+baseUrl
+            self.g.render(baseUrl)
+            self.imgUrl=baseUrl+".png"
             self.tableView.setModel(self.model)
             
-
+            print(self.imgUrl)
+            # 加载图片
+            DFAImage = QPixmap(self.imgUrl).scaledToHeight(500)
+            self.imageLabel.setPixmap(DFAImage)
             
-        except:
+            
+        except error:
+            print(error)
             errorMessage=QMessageBox()
             errorMessage.setWindowTitle("错误")
             errorMessage.setText("输入有误，请检查您的输入！")
             errorMessage.exec_()
+
+
+    def saveImage(self):
+        if self.g==None:
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("错误")
+            errorMessage.setText("请先生成DFA图！")
+            errorMessage.exec_()
+            return
+        self.g.view()
 
 
 if __name__=='__main__':

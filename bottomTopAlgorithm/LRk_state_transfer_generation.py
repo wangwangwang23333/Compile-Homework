@@ -166,7 +166,9 @@ class LR0:
         if len(self.translationArray) == 0:
             self.calculateDFA()
 
-        g = Digraph('..//outputImage//基于 LR(0)项目的 DFA图'+str(uuid.uuid1()), format="png")
+        imgUrl='基于 LR(0)项目的 DFA图'+str(uuid.uuid1())
+
+        g = Digraph(imgUrl, format="png")
 
         # 添加结点
         for index, item in enumerate(self.states):
@@ -187,7 +189,9 @@ class LR0:
         for i in self.translationArray:
             g.edge(str(i[0]), str(self.translationArray[(i[0], i[1])]), label=str(i[1]))
 
-        g.view()
+
+        
+        return imgUrl,g
 
 
 class LR1:
@@ -422,7 +426,9 @@ class LR1:
         if len(self.translationArray) == 0:
             self.calculateDFA()
 
-        g = Digraph('..//outputImage//基于 LR(1)项目的 DFA图'+str(uuid.uuid1()), format="png")
+        imgUrl='基于 LR(1)项目的 DFA图'+str(uuid.uuid1())
+
+        g = Digraph(imgUrl, format="png")
 
         # 添加结点
         for index, item in enumerate(self.states):
@@ -472,7 +478,8 @@ class LR1:
         for i in self.translationArray:
             g.edge(str(i[0]), str(self.translationArray[(i[0], i[1])]), label=str(i[1]))
 
-        g.view()
+        
+        return imgUrl,g
 
 
 if __name__ == '__main__':
