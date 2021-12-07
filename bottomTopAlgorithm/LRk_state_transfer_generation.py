@@ -7,17 +7,21 @@ Created on Fri Dec  3 00:32:19 2021
 
 import copy
 
-from GrammarManager import GrammarManager
+from bottomTopAlgorithm.GrammarManager import GrammarManager
 from graphviz import Digraph
+import uuid
 
 
 class LR0:
     def __init__(self):
         self.grammarManager = GrammarManager()
-        self.grammarManager.getInput()
+        # self.grammarManager.getInput()
 
         # 状态转移矩阵
         self.translationArray = dict()
+
+    def setGrammar(self,sentences):
+        self.grammarManager.getStr(sentences)
 
     '''
     计算initialRelation的闭包
@@ -162,7 +166,7 @@ class LR0:
         if len(self.translationArray) == 0:
             self.calculateDFA()
 
-        g = Digraph('..//outputImage//基于 LR(0)项目的 DFA图', format="png")
+        g = Digraph('..//outputImage//基于 LR(0)项目的 DFA图'+str(uuid.uuid1()), format="png")
 
         # 添加结点
         for index, item in enumerate(self.states):
@@ -189,7 +193,10 @@ class LR0:
 class LR1:
     def __init__(self):
         self.grammarManager = GrammarManager()
-        self.grammarManager.getInput()
+        # self.grammarManager.getInput()
+
+    def setGrammar(self,sentences):
+        self.grammarManager.getStr(sentences)
 
     '''
     计算initialRelation的闭包
@@ -415,7 +422,7 @@ class LR1:
         if len(self.translationArray) == 0:
             self.calculateDFA()
 
-        g = Digraph('..//outputImage//基于 LR(1)项目的 DFA图', format="png")
+        g = Digraph('..//outputImage//基于 LR(1)项目的 DFA图'+str(uuid.uuid1()), format="png")
 
         # 添加结点
         for index, item in enumerate(self.states):
@@ -487,12 +494,14 @@ E->i
     #lr0.getImage()
     #print(lr0.translationArray)
     #print(lr0.states)
-    print("nio")
-    lr1=LR1()
+    lr1=LR0()
+    lr1.grammarManager.getInput()
     lr1.calculateDFA()
     lr1.getImage()
-    print(lr1.states)
-    print(lr1.get_merged_looking_forward_string())
-    print(lr1.get_numbered_and_looking_forward_transfer_array())
-    print(lr1.translationArray)
+# =============================================================================
+#     print(lr1.states)
+#     print(lr1.get_merged_looking_forward_string())
+#     print(lr1.get_numbered_and_looking_forward_transfer_array())
+#     print(lr1.translationArray)
+# =============================================================================
 

@@ -14,6 +14,8 @@ from PyQt5.QtCore import QRegExp
 
 from bottomTopAlgorithm.GrammarManager import GrammarManager
 from bottomTopAlgorithm.OperatorPrecedenceGrammar import OperatorPrecedenceGrammar
+from bottomTopAlgorithm.LRk_state_transfer_generation import LR0,LR1
+
 
 class MainForm(QTabWidget):
     
@@ -150,6 +152,8 @@ class WidgetUI2(QWidget):
   
     def calculate(self):
         try:
+
+
             opg = OperatorPrecedenceGrammar()
             res = self.te.toPlainText().split("\n")
             opg.setGrammar(res)
@@ -188,7 +192,124 @@ class WidgetUI2(QWidget):
 class WidgetUI4(QWidget):
     def __init__(self):
         super().__init__()
+
         
+        # 文法选择按钮
+        self.rb1 = QRadioButton('LR(0)文法')
+        self.rb1.setChecked(True)
+        self.rb2 = QRadioButton('LR(1)文法')
+        self.buttonGroup=QButtonGroup()
+        self.buttonGroup.addButton(self.rb1,1)
+        self.buttonGroup.addButton(self.rb2,2)
+        
+
+        # 文法输入框
+        self.te = QTextEdit()
+        self.te.setPlaceholderText("在此输入文法规则")
+        self.te.setFontFamily("幼圆")
+        self.te.setFontPointSize(20)
+
+        vLayout1=QVBoxLayout()
+        vLayout1.addWidget(self.rb1)
+        vLayout1.addWidget(self.rb2)
+        vLayout1.addWidget(self.te)
+
+        # 水平方向
+        hLayout1=QHBoxLayout()
+
+  
+        # 展示表格
+        self.tableView=QTableView()
+        #水平方向，表格大小拓展到适当的尺寸
+        self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableView.horizontalHeader().setStretchLastSection(True)
+        
+        # 展示图片
+
+        vLayout1.addWidget(self.tableView)
+        hLayout1.addLayout(vLayout1)
+        
+
+        vLayout2=QHBoxLayout()
+        # 计算按钮
+        self.dealButton=QPushButton(self)
+        self.dealButton.setText("生成状态转移矩阵/DFA图")
+        self.dealButton.clicked.connect(self.calculate)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.dealButton.setToolTip("为上下文无关文法构造识别文法活前缀的 DFA")
+        self.dealButton.resize(self.dealButton.sizeHint())
+        # 范例按钮
+        self.exampleButton=QPushButton(self)
+        self.exampleButton.setText("范例")
+        self.exampleButton.clicked.connect(self.getExample)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.exampleButton.setToolTip("为了便于测试，我们准备了一个范例")
+        self.exampleButton.resize(self.exampleButton.sizeHint())
+
+        vLayout2.addWidget(self.dealButton)
+        vLayout2.addWidget(self.exampleButton)
+
+        hLayout2=QVBoxLayout()
+        hLayout2.addLayout(hLayout1)
+        hLayout2.addLayout(vLayout2)
+        
+        
+        self.setLayout(hLayout2)
+
+    def getExample(self):
+        try:
+            self.model.clear()
+        except:
+            pass
+        if self.rb1.isChecked():
+            self.te.setText("E' → E\nE->(E)\nE->i")
+        else:
+            self.te.setText("S'->S\nS->BB\nB->aB\nB->b")
+
+    def calculate(self):
+        try:
+            res = self.te.toPlainText().split("\n")
+            
+            if self.rb1.isChecked():
+                lr0 = LR0()
+            else:
+                lr0=LR1()
+            lr0.setGrammar(res)
+            lr0.calculateDFA()
+            print(lr0.translationArray)
+
+            transCondition=lr0.grammarManager.VT+lr0.grammarManager.VN
+            print("test",transCondition)
+            transCondition.remove(lr0.grammarManager.sentences[0][0])
+            
+            print(transCondition)
+
+            # 建立表格
+            self.model=QStandardItemModel(len(lr0.states),len(transCondition))
+            self.model.setHorizontalHeaderLabels(transCondition)
+            self.model.setVerticalHeaderLabels([str(i) for i in range(len(lr0.states))])
+
+            for row in range(len(lr0.states)):
+                for column in range(len(transCondition)):
+                    if ((row,transCondition[column])) in lr0.translationArray:
+                        item=QStandardItem(str(lr0.translationArray[(row,transCondition[column])]))
+                    else:
+                        item=QStandardItem(' ')
+                    self.model.setItem(row,column,item)
+            
+
+            lr0.getImage()
+            self.tableView.setModel(self.model)
+            
+
+            
+        except:
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("错误")
+            errorMessage.setText("输入有误，请检查您的输入！")
+            errorMessage.exec_()
+
 
 if __name__=='__main__':
     app=QApplication(sys.argv)
