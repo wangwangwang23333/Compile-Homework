@@ -33,6 +33,10 @@ class LALRTable:
                 self.table_VN.remove(i)
 
     def reduce_states(self):
+        """
+        按照 LALR 的要求缩减状态数量并且产生新的 states
+        :return: 新的 DFA states
+        """
         new_states = []
         # 记录下合并的项
         reduce_set = set()
@@ -56,7 +60,17 @@ class LALRTable:
                     merge_flag = True
             if not merge_flag:
                 new_states.append(i)
+        self.get_LALR_transfer_array(reduce_set, transfer_array)
+        self.states = new_states
+        return new_states
 
+    def get_LALR_transfer_array(self, reduce_set, transfer_array):
+        """
+        通过新的状态和状态转移矩阵计算得出一个 LALR 分析表
+        :param reduce_set: 去掉的状态
+        :param transfer_array: 之前的状态转移矩阵
+        :return: 新的状态转移矩阵
+        """
         # 原始状态数
         old_state_num = len(self.lr1_states)
         # 刚刚被合并的状态要移除
@@ -84,7 +98,7 @@ class LALRTable:
             if k != v:
                 filter_set.add(k)
 
-        # 在做一次移除
+        # 再做一次移除
         remove_list = []
         for i in filter_set:
             for j in transfer_array.keys():
@@ -103,10 +117,9 @@ class LALRTable:
             else:
                 new_array[(change_map[pos[0]], pos[1])] = v
         # 赋值给 self 变量，完成初始化
-        self.states = new_states
         self.state_transfer_array = new_array
         # print(new_array)
-        return new_states
+        return new_array
 
     @staticmethod
     def _merge_two_states(state1, state2):
@@ -136,7 +149,7 @@ class LALRTable:
 
     def get_analysis_table(self):
         """
-        返回LR(1) 算法分析表。
+        返回 LALR 算法分析表。
         一个元组，(action表, goto表)
         :return: (action表, goto表)
         """
