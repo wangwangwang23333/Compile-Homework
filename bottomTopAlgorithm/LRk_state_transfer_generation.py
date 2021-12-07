@@ -20,15 +20,13 @@ class LR0:
         # 状态转移矩阵
         self.translationArray = dict()
 
-    def setGrammar(self,sentences):
+    def setGrammar(self, sentences):
         self.grammarManager.getStr(sentences)
 
-    '''
-    计算initialRelation的闭包
-    '''
-
     def getClosure(self, initialRelation):
-
+        """
+        计算initialRelation的闭包
+        """
         result = [initialRelation]
 
         # 闭包中的数量是否增加
@@ -60,11 +58,10 @@ class LR0:
                             newAppear = True
         return result
 
-    """
-    在状态I下接受符号X，所产生的[[]]
-    """
-
     def getGoIX(self, I, X):
+        """
+        在状态I下接受符号X，所产生的[[]]
+        """
         result = []
         for i in I:
             if i[2] >= len(i[1]):
@@ -83,16 +80,15 @@ class LR0:
                     newResult.append(j)
         return newResult
 
-    '''
-    计算DFA
-    一个 LR0 DFA 当中的产生式状态是一个三元组，分别表示以下含义：
-    1. 产生式左部
-    2. 产生式右部
-    3. 当前接受位置
-    Example: E->a·B 对应的三元组为["E","aB",1]
-    '''
-
     def calculateDFA(self):
+        """
+        计算DFA
+        一个 LR0 DFA 当中的产生式状态是一个三元组，分别表示以下含义：
+        1. 产生式左部
+        2. 产生式右部
+        3. 当前接受位置
+        Example: E->a·B 对应的三元组为["E","aB",1]
+        """
         # 每一个状态闭包，应当是一个集合
         initialRelation = [self.grammarManager.sentences[0][0], \
                            self.grammarManager.sentences[0][1], 0]
@@ -158,15 +154,14 @@ class LR0:
 
             self.states = newStates
 
-    """
-    绘图
-    """
-
     def getImage(self):
+        """
+        绘图
+        """
         if len(self.translationArray) == 0:
             self.calculateDFA()
 
-        imgUrl='基于 LR(0)项目的 DFA图'+str(uuid.uuid1())
+        imgUrl = '基于 LR(0)项目的 DFA图' + str(uuid.uuid1())
 
         g = Digraph(imgUrl, format="png")
 
@@ -189,9 +184,7 @@ class LR0:
         for i in self.translationArray:
             g.edge(str(i[0]), str(self.translationArray[(i[0], i[1])]), label=str(i[1]))
 
-
-        
-        return imgUrl,g
+        return imgUrl, g
 
 
 class LR1:
@@ -199,14 +192,13 @@ class LR1:
         self.grammarManager = GrammarManager()
         # self.grammarManager.getInput()
 
-    def setGrammar(self,sentences):
+    def setGrammar(self, sentences):
         self.grammarManager.getStr(sentences)
 
-    '''
-    计算initialRelation的闭包
-    '''
-
     def getClosure(self, initialRelation):
+        """
+        计算initialRelation的闭包
+        """
 
         result = [initialRelation]
 
@@ -250,11 +242,10 @@ class LR1:
                                 newAppear = True
         return result
 
-    '''
-    计算Go(I,X):即在状态I下接受输入X
-    '''
-
     def getGoIX(self, I, X):
+        """
+        计算Go(I,X):即在状态I下接受输入X
+        """
         result = []
         for i in I:
             if i[2] >= len(i[1]):
@@ -278,7 +269,6 @@ class LR1:
         return newResult
 
     '''
-    计算DFA
     一个 LR1 DFA 当中的产生式状态是一个四元组，分别表示以下含义：
     1. 产生式左部
     2. 产生式右部
@@ -292,6 +282,9 @@ class LR1:
     '''
 
     def calculateDFA(self):
+        """
+        计算DFA
+        """
         # 每一个状态闭包，应当是一个集合
         initialRelation = [self.grammarManager.sentences[0][0],
                            self.grammarManager.sentences[0][1], 0, '#']
@@ -371,7 +364,7 @@ class LR1:
             new_item = []
             cur_item = copy.deepcopy(item)
             item = copy.deepcopy(item)
-            while len(item) >0:
+            while len(item) > 0:
                 result = []
                 basic_line = [item[0][0], item[0][1], item[0][2]]
                 # 有可能是规约项，有第五个元素
@@ -418,15 +411,14 @@ class LR1:
 
         return new_transfer_array
 
-    """
-    绘图
-    """
-
     def getImage(self):
+        """
+        绘图
+        """
         if len(self.translationArray) == 0:
             self.calculateDFA()
 
-        imgUrl='基于 LR(1)项目的 DFA图'+str(uuid.uuid1())
+        imgUrl = '基于 LR(1)项目的 DFA图' + str(uuid.uuid1())
 
         g = Digraph(imgUrl, format="png")
 
@@ -478,8 +470,7 @@ class LR1:
         for i in self.translationArray:
             g.edge(str(i[0]), str(self.translationArray[(i[0], i[1])]), label=str(i[1]))
 
-        
-        return imgUrl,g
+        return imgUrl, g
 
 
 if __name__ == '__main__':
@@ -496,12 +487,12 @@ E'->E
 E->(E)
 E->i
     """
-    #lr0 = LR1()
-    #lr0.calculateDFA()
-    #lr0.getImage()
-    #print(lr0.translationArray)
-    #print(lr0.states)
-    lr1=LR0()
+    # lr0 = LR1()
+    # lr0.calculateDFA()
+    # lr0.getImage()
+    # print(lr0.translationArray)
+    # print(lr0.states)
+    lr1 = LR0()
     lr1.grammarManager.getInput()
     lr1.calculateDFA()
     lr1.getImage()
@@ -511,4 +502,3 @@ E->i
 #     print(lr1.get_numbered_and_looking_forward_transfer_array())
 #     print(lr1.translationArray)
 # =============================================================================
-
