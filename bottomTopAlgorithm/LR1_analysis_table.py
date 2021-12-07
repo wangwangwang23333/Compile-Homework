@@ -1,23 +1,10 @@
+"""
+@author zzy
+@date
+"""
 from bottomTopAlgorithm.LRk_state_transfer_generation import LR1
+from bottomTopAlgorithm.action import Action
 import copy
-
-
-class Action:
-    """
-    对应 Action 表中的 action
-    """
-
-    def __init__(self, state, act="shift"):
-        self.state = state
-        self.action = act
-        if not self.action.startswith("s") and not self.action.startswith("r") and not self.action.startswith("a"):
-            raise Exception("没有这样的动作" + act)
-
-    def __repr__(self):
-        if self.action.startswith("a"):
-            return "acc"
-        return self.action[0] + str(self.state)
-
 
 class LR1Table:
     """
@@ -25,8 +12,8 @@ class LR1Table:
     通过
     """
 
-    def __init__(self):
-        self.lr1 = LR1()
+    def __init__(self, lr1):
+        self.lr1 = lr1
         self.lr1.calculateDFA()
         self.state_transfer_array = self.lr1.get_numbered_and_looking_forward_transfer_array()
         self.action = dict()
@@ -133,7 +120,8 @@ E->(E)
 E->i
 """
 if __name__ == "__main__":
-    print("Hello World")
-    table = LR1Table()
+    lr1 = LR1()
+    lr1.grammarManager.getInput()
+    table = LR1Table(lr1)
     table.show()
 
