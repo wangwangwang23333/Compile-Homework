@@ -38,12 +38,22 @@ class MainForm(QTabWidget):
         # 选项卡控件
         self.tab1=WidgetUI1()
         self.tab2=WidgetUI2()
+        self.tab3=WidgetUI3()
         self.tab4=WidgetUI4()
+        self.tab5=WidgetUI5()
+        self.tab6=WidgetUI6()
+        self.tab7=WidgetUI7()
+        self.tab8=WidgetUI8()
         
         # 加入顶层窗口
         self.addTab(self.tab1,"算法3.1")
         self.addTab(self.tab2,"算法3.2")
+        self.addTab(self.tab3,"算法3.3")
         self.addTab(self.tab4,"算法3.4")
+        self.addTab(self.tab5,"算法3.5")
+        self.addTab(self.tab6,"算法3.6")
+        self.addTab(self.tab7,"算法3.7")
+        self.addTab(self.tab8,"算法3.8")
         
  
 class WidgetUI1(QWidget):
@@ -267,9 +277,7 @@ class WidgetUI4(QWidget):
         hLayout2=QVBoxLayout()
         hLayout2.addLayout(hLayout1)
         hLayout2.addLayout(vLayout2)
-
-
-        
+ 
         self.setLayout(hLayout2)
 
     def getExample(self):
@@ -332,7 +340,6 @@ class WidgetUI4(QWidget):
             errorMessage.setText("输入有误，请检查您的输入！")
             errorMessage.exec_()
 
-
     def saveImage(self):
         if self.g==None:
             errorMessage=QMessageBox()
@@ -342,6 +349,28 @@ class WidgetUI4(QWidget):
             return
         self.g.view()
 
+class WidgetUI3(QWidget):
+    def __init__(self):
+        super().__init__()
+
+class WidgetUI5(QWidget):
+    def __init__(self):
+        super().__init__()
+
+
+class WidgetUI6(QWidget):
+    def __init__(self):
+        super().__init__()
+
+
+class WidgetUI7(QWidget):
+    def __init__(self):
+        super().__init__()
+
+
+class WidgetUI8(QWidget):
+    def __init__(self):
+        super().__init__()
 
 if __name__=='__main__':
     app=QApplication(sys.argv)
