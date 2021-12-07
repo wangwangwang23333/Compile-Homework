@@ -13,6 +13,7 @@ from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtCore import QRegExp
 
 from bottomTopAlgorithm.GrammarManager import GrammarManager
+from bottomTopAlgorithm.OperatorPrecedenceGrammar import OperatorPrecedenceGrammar
 
 class MainForm(QTabWidget):
     
@@ -34,10 +35,13 @@ class MainForm(QTabWidget):
         
         # 选项卡控件
         self.tab1=WidgetUI1()
-        
+        self.tab2=WidgetUI2()
+        self.tab4=WidgetUI4()
         
         # 加入顶层窗口
         self.addTab(self.tab1,"算法3.1")
+        self.addTab(self.tab2,"算法3.2")
+        self.addTab(self.tab4,"算法3.4")
         
  
 class WidgetUI1(QWidget):
@@ -48,6 +52,8 @@ class WidgetUI1(QWidget):
 
         self.te = QTextEdit(self)
         self.te.move(50,200)
+        self.te.setFontFamily("幼圆")
+        self.te.setFontPointSize(20)
         label1=QLabel("输入文法规则",self)
         label1.move(50,170)
 
@@ -55,7 +61,7 @@ class WidgetUI1(QWidget):
         self.outputArea = QTextEdit(self)
         self.outputArea.move(600,200)
         self.outputArea.setReadOnly(True)
-        label2=QLabel("输入文法规则",self)
+        label2=QLabel("输出",self)
         label2.move(600,170)
 
         self.dealButton=QPushButton(self)
@@ -98,6 +104,91 @@ class WidgetUI1(QWidget):
 
     def getExample(self):
         self.te.setText("S→a│^│(T)\nT→T,S│S")
+
+
+class WidgetUI2(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.te = QTextEdit()
+        self.te.setPlaceholderText("在此输入文法规则")
+        self.te.setFontFamily("幼圆")
+        self.te.setFontPointSize(20)
+
+        self.dealButton=QPushButton(self)
+        self.dealButton.setText("生成优先关系表")
+        self.dealButton.clicked.connect(self.calculate)
+        QToolTip.setFont(QFont('SansSerif', 10))
+        self.dealButton.setToolTip("为算符优先文法生成算符之间的优先关系表")
+        self.dealButton.resize(self.dealButton.sizeHint())
+        self.dealButton.move(400,250)
+
+
+        self.exampleButton=QPushButton(self)
+        self.exampleButton.setText("范例")
+        self.exampleButton.clicked.connect(self.getExample)
+        QToolTip.setFont(QFont('SansSerif', 10))
+        self.exampleButton.setToolTip("为了便于测试，我们准备了一个范例")
+        self.exampleButton.resize(self.exampleButton.sizeHint())
+        self.exampleButton.move(400,300)
+
+        self.tableView=QTableView()
+        #水平方向，表格大小拓展到适当的尺寸
+        self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        
+        self.tableView.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        
+        self.tableView.horizontalHeader().setStretchLastSection(True)
+        
+
+        layout=QVBoxLayout()
+        layout.addWidget(self.tableView)
+        layout.addWidget(self.te)
+        layout.addWidget(self.dealButton)
+        layout.addWidget(self.exampleButton)
+        self.setLayout(layout)
+  
+    def calculate(self):
+        try:
+            opg = OperatorPrecedenceGrammar()
+            res = self.te.toPlainText().split("\n")
+            opg.setGrammar(res)
+            opg.getPriorityTable()
+            vnLen = len(opg.grammarManager.VT)
+
+            # 建立vnLen * vnLen 的表格
+            self.model=QStandardItemModel(vnLen,vnLen)
+            # 设置水平方向头标签文本内容
+            self.model.setHorizontalHeaderLabels(opg.grammarManager.VT)
+            # 设置竖直方向
+            self.model.setVerticalHeaderLabels(opg.grammarManager.VT)
+         
+            for row in range(vnLen):
+                for column in range(vnLen):
+                    if (opg.grammarManager.VT[row],
+                    opg.grammarManager.VT[column]) in opg.priorityTable:
+                        item=QStandardItem(opg.priorityTable[(opg.grammarManager.VT[row],
+                    opg.grammarManager.VT[column])])
+                    else:
+                        item=QStandardItem(' ')
+                    self.model.setItem(row,column,item)
+            
+            
+            self.tableView.setModel(self.model)
+            
+        except:
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("错误")
+            errorMessage.setText("输入有误，请检查您的输入！")
+            errorMessage.exec_()
+
+    def getExample(self):
+        self.te.setText("S→a│^│(T)\nT→T,S│S")
+    
+class WidgetUI4(QWidget):
+    def __init__(self):
+        super().__init__()
+        
 
 if __name__=='__main__':
     app=QApplication(sys.argv)

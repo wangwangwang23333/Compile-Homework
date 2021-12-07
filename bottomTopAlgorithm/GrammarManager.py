@@ -5,7 +5,7 @@
 @author 1851055 汪明杰
 """
 
-from stack import Stack
+from bottomTopAlgorithm.stack import Stack
 
 
 class GrammarManager:

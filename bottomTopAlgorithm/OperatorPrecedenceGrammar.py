@@ -7,7 +7,7 @@ Created on Sun Dec  5 01:03:06 2021
 @author: 1851055 汪明杰
 """
 
-from GrammarManager import GrammarManager
+from bottomTopAlgorithm.GrammarManager import GrammarManager
 
 
 class OperatorPrecedenceGrammar:
@@ -15,10 +15,13 @@ class OperatorPrecedenceGrammar:
     def __init__(self):
         self.grammarManager = GrammarManager()
 
-        self.grammarManager.getInput()
+        #self.grammarManager.getInput()
 
         # 算符优先级关系
         self.priorityTable = dict()
+
+    def setGrammar(self,sentences):
+        self.grammarManager.getStr(sentences)
 
     '''
     为算符文法生成算符之间的优先关系表

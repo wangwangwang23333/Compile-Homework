@@ -143,15 +143,3 @@ if __name__ == "__main__":
     table.getVisibleLR0Table()
     table.showVisibleLR0Table()
                     
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-            
-            
