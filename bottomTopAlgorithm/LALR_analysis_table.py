@@ -180,9 +180,9 @@ class LALRTable:
 
         nVT = len(self.table_VT)
         nVN = len(self.table_VN)
-        # 生成全是 None 的表
+        # 生成全是 '' 的表
         for i in range(rows + 1):
-            table.append([None] * (nVT + nVN + 1))
+            table.append([''] * (nVT + nVN + 1))
         # 第一列是序号
         for i in range(1, rows + 1):
             table[i][0] = i - 1
@@ -206,7 +206,7 @@ class LALRTable:
         """
         for i in self.get_visible_table():
             for j in i:
-                if j is not None:
+                if j !='':
                     print(j, '\t', end="")
                 else:
                     print('\t', end="")
@@ -222,6 +222,57 @@ class LALRTable:
             return self.table_VN.index(v) + len(self.table_VT) + 1
         return self.table_VT.index(v) + 1
 
+    def getStateStr(self,index):
+        # 输出states[index]的字符串
+        return
+
+
+        item=self.states[index]
+        # 对item合并状态
+        newItem = []
+        curItem = copy.deepcopy(item)
+        item = copy.deepcopy(item)
+        while len(item) > 0:
+            result = []
+            basicLine = [item[0][0], item[0][1], item[0][2]]
+            for i in curItem:
+                if i[0] == basicLine[0] and i[1] == basicLine[1] and i[2] == basicLine[2]:
+                    # 将item.index(i)移除
+                    result.append(i[3])
+                    item.remove(i)
+
+            # 排序，按照字母顺序输出，这样好看
+            result.sort()
+
+            # 将item整理成一个字符串
+            preStr = ""
+            for kindex, kitem in enumerate(result):
+                if kindex != 0:
+                    preStr += "|"
+                preStr += kitem
+            
+            newItem.append([basicLine[0], basicLine[1], basicLine[2], preStr])
+
+        showLabel = ""
+        # str(index)+"     "
+        for jndex,j in enumerate(newItem):
+
+            if jndex!=0:
+                showLabel += "\n"
+
+            showLabel += j[0] + "->"
+            for t in range(len(j[1])):
+                if t == j[2]:
+                    showLabel += "·"
+                showLabel += j[1][t]
+            if j[2] >= len(j[1]):
+                showLabel += "·"
+
+            showLabel += "," + j[3]
+
+            
+        
+        return showLabel
 
 if __name__ == "__main__":
     lr1 = LR1()

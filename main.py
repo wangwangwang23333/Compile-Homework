@@ -17,6 +17,7 @@ from bottomTopAlgorithm.OperatorPrecedenceGrammar import OperatorPrecedenceGramm
 from bottomTopAlgorithm.LRk_state_transfer_generation import LR0,LR1
 from bottomTopAlgorithm.LR0_analysis_table import LR0Table
 from bottomTopAlgorithm.LR1_analysis_table import LR1Table
+from bottomTopAlgorithm.LALR_analysis_table import LALRTable
 
 class MainForm(QTabWidget):
     
@@ -587,8 +588,7 @@ class WidgetUI7(QWidget):
             self.tableView2.setModel(self.model2)
             print(self.model2)
             
-        except error:
-            print(error)
+        except:
             errorMessage=QMessageBox()
             errorMessage.setWindowTitle("错误")
             errorMessage.setText("输入有误，请检查您的输入！")
@@ -600,6 +600,129 @@ class WidgetUI7(QWidget):
 class WidgetUI8(QWidget):
     def __init__(self):
         super().__init__()
+
+        # 文法输入框
+        self.te = QTextEdit()
+        self.te.setPlaceholderText("在此输入文法规则")
+        self.te.setFontFamily("幼圆")
+        self.te.setFontPointSize(20)
+
+        # 计算按钮
+        self.dealButton=QPushButton(self)
+        self.dealButton.setText("构造LALR分析表")
+        self.dealButton.clicked.connect(self.calculate)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.dealButton.setToolTip("根据识别文法活前缀的 DFA 构造 LALR分析表")
+        self.dealButton.resize(self.dealButton.sizeHint())
+        # 范例按钮
+        self.exampleButton=QPushButton(self)
+        self.exampleButton.setText("范例")
+        self.exampleButton.clicked.connect(self.getExample)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.exampleButton.setToolTip("为了便于测试，我们准备了一个范例")
+        self.exampleButton.resize(self.exampleButton.sizeHint())
+
+        vLayout=QVBoxLayout()
+        vLayout.addWidget(self.te)
+        vLayout.addWidget(self.dealButton)
+        vLayout.addWidget(self.exampleButton)
+   
+        hLayout=QHBoxLayout()
+        hLayout.addLayout(vLayout)
+
+        # 表格1
+        actionVLayout=QVBoxLayout()
+        actionLabel=QLabel()
+        actionLabel.setAlignment(Qt.AlignCenter)
+        actionLabel.setFont(QFont("幼圆",20))
+        actionLabel.setText("ACTION")
+
+        self.tableView1=QTableView()
+        #水平方向，表格大小拓展到适当的尺寸
+        self.tableView1.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableView1.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableView1.horizontalHeader().setStretchLastSection(True)
+        self.tableView1.verticalHeader().setVisible(False)
+
+        actionVLayout.addWidget(actionLabel)
+        actionVLayout.addWidget(self.tableView1)
+
+        hLayout.addLayout(actionVLayout)
+
+        # 表格2
+        gotoVLayout=QVBoxLayout()
+        gotoLabel=QLabel()
+        gotoLabel.setAlignment(Qt.AlignCenter)
+        gotoLabel.setFont(QFont("幼圆",20))
+        gotoLabel.setText("GOTO")
+
+        self.tableView2=QTableView()
+        self.tableView2.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableView2.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableView2.horizontalHeader().setStretchLastSection(True)
+        self.tableView2.verticalHeader().setVisible(False)
+
+        gotoVLayout.addWidget(gotoLabel)
+        gotoVLayout.addWidget(self.tableView2)
+
+        hLayout.addLayout(gotoVLayout)
+
+        self.setLayout(hLayout)
+
+
+    def calculate(self):
+        try:
+            res = self.te.toPlainText().split("\n")
+
+            lr1=LR1()
+            lr1.setGrammar(res)
+            lalrTable = LALRTable(lr1)
+
+            print(lalrTable.states)
+
+            printTable=lalrTable.get_visible_table()
+
+            ## ACTION表
+            self.model1=QStandardItemModel(len(lalrTable.states),
+            len(lalrTable.table_VT)+1)
+            self.model1.setHorizontalHeaderLabels([' ']+lalrTable.table_VT)
+      
+            for row in range(len(lalrTable.states)):
+                for col in range(len(lalrTable.table_VT)+1):
+                    if col==0:
+                        item=QStandardItem(str(row))
+                        item.setToolTip("state"+str(row)+":\n")
+                    else:
+                        # 存在与否
+                        # if (row,lalrTable.table_VT[col-1]) in lalrTable.state_transfer_array:
+                        #     item=QStandardItem(str(printTable[row+1][col]))
+                        item=QStandardItem(str(printTable[row+1][col]))
+                    self.model1.setItem(row,col,item)
+            
+            self.tableView1.setModel(self.model1)
+
+            ### GOTO表
+            self.model2=QStandardItemModel(len(lalrTable.states),
+            len(lalrTable.table_VN))
+            self.model2.setHorizontalHeaderLabels(lalrTable.table_VN)
+
+            for row in range(len(lalrTable.states)):
+                for column in range(len(lalrTable.table_VN)):
+                    item=QStandardItem(str(printTable[row+1][column+1+len(lalrTable.table_VT)]))
+                    self.model2.setItem(row,column,item)
+            self.tableView2.setModel(self.model2)
+            print(self.model2)
+            
+        except error:
+            print(error)
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("错误")
+            errorMessage.setText("输入有误，请检查您的输入！")
+            errorMessage.exec_()
+
+    def getExample(self):
+        self.te.setText("S'->S\nS->BB\nB->aB\nB->b")
+
 
 if __name__=='__main__':
     app=QApplication(sys.argv)
