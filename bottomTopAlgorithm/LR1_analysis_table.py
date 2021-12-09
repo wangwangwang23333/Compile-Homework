@@ -63,9 +63,9 @@ class LR1Table:
 
         nVT = len(self.table_VT)
         nVN = len(self.table_VN)
-        # 生成全是 None 的表
+        # 生成全是 '' 的表
         for i in range(rows+1):
-            table.append([None]*(nVT + nVN + 1))
+            table.append(['']*(nVT + nVN + 1))
         # 第一列是序号
         for i in range(1, rows+1):
             table[i][0] = i-1
@@ -89,7 +89,7 @@ class LR1Table:
         """
         for i in self.get_visible_table():
             for j in i:
-                if j is not None:
+                if j != '':
                     print(j, '\t', end="")
                 else:
                     print('\t', end="")

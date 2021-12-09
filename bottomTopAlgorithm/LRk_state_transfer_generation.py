@@ -428,6 +428,54 @@ class LR1:
 
         return new_transfer_array
 
+    def getStateStr(self,index):
+        item=self.states[index]
+        # 对item合并状态
+        newItem = []
+        curItem = copy.deepcopy(item)
+        item = copy.deepcopy(item)
+        while len(item) > 0:
+            result = []
+            basicLine = [item[0][0], item[0][1], item[0][2]]
+            for i in curItem:
+                if i[0] == basicLine[0] and i[1] == basicLine[1] and i[2] == basicLine[2]:
+                    # 将item.index(i)移除
+                    result.append(i[3])
+                    item.remove(i)
+
+            # 排序，按照字母顺序输出，这样好看
+            result.sort()
+
+            # 将item整理成一个字符串
+            preStr = ""
+            for kindex, kitem in enumerate(result):
+                if kindex != 0:
+                    preStr += "|"
+                preStr += kitem
+            
+            newItem.append([basicLine[0], basicLine[1], basicLine[2], preStr])
+
+        showLabel = ""
+        # str(index)+"     "
+        for jndex,j in enumerate(newItem):
+
+            if jndex!=0:
+                showLabel += "\n"
+
+            showLabel += j[0] + "->"
+            for t in range(len(j[1])):
+                if t == j[2]:
+                    showLabel += "·"
+                showLabel += j[1][t]
+            if j[2] >= len(j[1]):
+                showLabel += "·"
+
+            showLabel += "," + j[3]
+
+            
+        
+        return showLabel
+
     def getImage(self):
         """
         绘图

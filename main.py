@@ -556,44 +556,36 @@ class WidgetUI7(QWidget):
             lr1=LR1()
             lr1.setGrammar(res)
             lr1Table = LR1Table(lr1)
-            print(lr1Table.table_VT)
-            print(lr1Table.table_VN)
-            print(lr1Table.get_visible_table())
+            printTable=lr1Table.get_visible_table() 
 
-
-            return
-
-
-
-            self.model1=QStandardItemModel(len(lr0table.visibleTable_VT)-1,
-            len(lr0table.visibleTable_VT[0]))
-            self.model1.setHorizontalHeaderLabels(lr0table.visibleTable_VT[0][:])
+            ## ACTION表
+            self.model1=QStandardItemModel(len(lr1Table.lr1.states),
+            len(lr1Table.table_VT)+1)
+            self.model1.setHorizontalHeaderLabels([' ']+lr1Table.table_VT)
       
-            for row in range(len(lr0table.visibleTable_VT)-1):
-                for column in range(1,len(lr0table.visibleTable_VT[0])):
-                    item=QStandardItem(lr0table.visibleTable_VT[row+1][column])
-                    self.model1.setItem(row,column,item)
-            
-            for row in range(0,len(lr0table.visibleTable_VT)-1):
-                item=QStandardItem(str(row))
-                item.setToolTip("state"+str(row)+":\n"+lr0table.lr0.getStateStr(row))
-                self.model1.setItem(row,0,item)
-                
+            for row in range(len(lr1Table.lr1.states)):
+                for col in range(len(lr1Table.table_VT)+1):
+                    if col==0:
+                        item=QStandardItem(str(row))
+                        item.setToolTip("state"+str(row)+":\n"+lr1Table.lr1.getStateStr(row))
+                    else:
+                        item=QStandardItem(str(printTable[row+1][col]))
+                    self.model1.setItem(row,col,item)
             
             self.tableView1.setModel(self.model1)
 
-            ### 表格2
-            self.model2=QStandardItemModel(len(lr0table.visibleTable_VN)-1,
-            len(lr0table.visibleTable_VN[0])-1)
-            self.model2.setHorizontalHeaderLabels(lr0table.visibleTable_VN[0][1:])
-            
 
-            for row in range(len(lr0table.visibleTable_VN)-1):
-                for column in range(len(lr0table.visibleTable_VN[0])-1):
-                    item=QStandardItem(lr0table.visibleTable_VN[row+1][column+1])
+            ### GOTO表
+            self.model2=QStandardItemModel(len(lr1Table.lr1.states),
+            len(lr1Table.table_VN))
+            self.model2.setHorizontalHeaderLabels(lr1Table.table_VN)
+
+            for row in range(len(lr1Table.lr1.states)):
+                for column in range(len(lr1Table.table_VN)):
+                    item=QStandardItem(str(printTable[row+1][column+1+len(lr1Table.table_VT)]))
                     self.model2.setItem(row,column,item)
             self.tableView2.setModel(self.model2)
-            
+            print(self.model2)
             
         except error:
             print(error)
