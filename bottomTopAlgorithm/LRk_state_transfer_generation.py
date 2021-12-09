@@ -154,6 +154,23 @@ class LR0:
 
             self.states = newStates
 
+    def getStateStr(self,index):
+        showLabel = ""
+        item=self.states[index]
+        for j,jtem in enumerate(item):
+            if j!=0:
+                showLabel += "\n"
+            showLabel += jtem[0] + "->"
+            for t in range(len(jtem[1])):
+                if t == jtem[2]:
+                    showLabel += "·"
+                showLabel += jtem[1][t]
+            if jtem[2] >= len(jtem[1]):
+                showLabel += "·"
+            
+        return showLabel
+
+
     def getImage(self):
         """
         绘图

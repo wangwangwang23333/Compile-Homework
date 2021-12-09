@@ -5,19 +5,21 @@ LR(0)
 @author: leoy
 """
 
-from LRk_state_transfer_generation  import LR0
+from bottomTopAlgorithm.LRk_state_transfer_generation  import LR0
 
 class LR0Table:
     
-    def __init__(self):
+    def __init__(self,sentences):
         
         self.lr0 = LR0()
+        self.lr0.setGrammar(sentences)
         self.lr0.calculateDFA()
         self.action = [[["",-1] for i in range(len(self.lr0.grammarManager.VT) + 1)] for j in range(len(self.lr0.states))]
         self.goto = [[-1 for i in range(len(self.lr0.grammarManager.VN) - 1)] for j in range(len(self.lr0.states))]
         
         self.getTranslationArrayWithNumber()
         self.get_LR0_analysis_table()
+        
     
     def get_VN_index_for_goto(self,c):
         '''
@@ -80,49 +82,61 @@ class LR0Table:
     
     def getVisibleLR0Table(self):
         
-        strLine = []
-        strLine.append(" ")
+        strLine_VT = []
+        strLine_VN = []
+        strLine_VT.append(" ")
+        strLine_VN.append(" ")
         for c in self.lr0.grammarManager.VT:
-            strLine.append(c)
-        strLine.append("#")
+            strLine_VT.append(c)
+        strLine_VT.append("#")
         
         for n in self.lr0.grammarManager.VN:
             if "'" not in n:
-                strLine.append(n)
+                strLine_VN.append(n)
         
-        strLines = []
-        strLines.append(strLine)
+        strLines_VT = []
+        strLines_VT.append(strLine_VT)
+        strLines_VN = []
+        strLines_VN.append(strLine_VN)
         
         for index,act in enumerate(self.action):
-            strLine = []
-            strLine.append(str(index))
-            
+            strLine_VT = []
+            strLine_VN = []
+            strLine_VT.append(str(index))
+            strLine_VN.append(str(index))
+
             for i,item in enumerate(act):
                 if item[0] == 'acc':
-                    strLine.append(item[0])
+                    strLine_VT.append(item[0])
                 elif item[0] != "":
-                    strLine.append(item[0]+str(item[1]))
+                    strLine_VT.append(item[0]+str(item[1]))
                 else:
-                    strLine.append(" ")
+                    strLine_VT.append(" ")
             for it in self.goto[index]:
+
                 if it != -1:
-                    strLine.append(str(it))
+                    strLine_VN.append(str(it))
                 else:
-                    strLine.append(" ")
+                    strLine_VN.append(" ")
             
-            strLines.append(strLine)
+            strLines_VT.append(strLine_VT)
+            strLines_VN.append(strLine_VN)
             
-        self.visibleTable = strLines
+        self.visibleTable_VT = strLines_VT
+        self.visibleTable_VN = strLines_VN
     
     def showVisibleLR0Table(self):
-        
-        for item in self.visibleTable:
+        print("action Table:")
+        for item in self.visibleTable_VT:
             for char in item:
                 print("%3s"%(char),end=" ")
             print("\n")
-                 
-            
-            
+        print("goto Table:")
+        for item in self.visibleTable_VN:
+            for char in item:
+                print("%3s"%(char),end=" ")
+            print("\n")
+
             
 """
 测试：
@@ -140,6 +154,4 @@ E->i
 if __name__ == "__main__":
     
     table = LR0Table()
-    table.getVisibleLR0Table()
-    table.showVisibleLR0Table()
-                    
+    table.showVisibleLR0Table()          
