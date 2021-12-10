@@ -239,7 +239,9 @@ class LALRTable:
             if j[2] >= len(j[1]):
                 showLabel += "·"
             showLabel += ","
-            for index_lft, lft in enumerate(j[3]):
+            lfts=copy.deepcopy(j[3])
+            lfts.sort()
+            for index_lft, lft in enumerate(lfts):
                 if index_lft != 0:
                     showLabel += '|'
                 showLabel += lft

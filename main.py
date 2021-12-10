@@ -691,7 +691,7 @@ class WidgetUI8(QWidget):
                 for col in range(len(lalrTable.table_VT)+1):
                     if col==0:
                         item=QStandardItem(str(row))
-                        item.setToolTip("state"+str(row)+":\n")
+                        item.setToolTip("state"+str(row)+":\n"+lalrTable.get_state_str(row))
                     else:
                         # 存在与否
                         # if (row,lalrTable.table_VT[col-1]) in lalrTable.state_transfer_array:
