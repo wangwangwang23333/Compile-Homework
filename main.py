@@ -19,6 +19,8 @@ from bottomTopAlgorithm.LR0_analysis_table import LR0Table
 from bottomTopAlgorithm.LR1_analysis_table import LR1Table
 from bottomTopAlgorithm.LALR_analysis_table import LALRTable
 from bottomTopAlgorithm.stack import Stack
+import uuid
+from graphviz import Digraph
 
 class MainForm(QTabWidget):
     
@@ -817,6 +819,8 @@ class ComprehensiveExperiment(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.g=None
+
         # 文法输入框
         self.te = QTextEdit()
         self.te.setPlaceholderText("在此输入文法规则")
@@ -831,10 +835,10 @@ class ComprehensiveExperiment(QWidget):
 
         # 计算按钮
         self.dealButton=QPushButton(self)
-        self.dealButton.setText("构造LR分析表")
+        self.dealButton.setText("语法分析")
         self.dealButton.clicked.connect(self.calculate)
         QToolTip.setFont(QFont('SansSerif', 15))
-        self.dealButton.setToolTip("根据识别文法活前缀的 DFA 构造 LR分析表")
+        self.dealButton.setToolTip("根据识别文法活前缀的 DFA 构造 LR(1)分析表，并对语法进行分析")
         self.dealButton.resize(self.dealButton.sizeHint())
         # 范例按钮
         self.exampleButton=QPushButton(self)
@@ -844,11 +848,19 @@ class ComprehensiveExperiment(QWidget):
         self.exampleButton.setToolTip("为了便于测试，我们准备了一个范例")
         self.exampleButton.resize(self.exampleButton.sizeHint())
 
+        self.saveButton=QPushButton(self)
+        self.saveButton.setText("保存图片")
+        self.saveButton.clicked.connect(self.saveImage)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.saveButton.setToolTip("您可以保存生成的语法树")
+        self.saveButton.resize(self.saveButton.sizeHint())
+
         vLayout=QVBoxLayout()
         vLayout.addWidget(self.te)
         vLayout.addWidget(self.analysisInput)
         vLayout.addWidget(self.dealButton)
         vLayout.addWidget(self.exampleButton)
+        vLayout.addWidget(self.saveButton)
    
         hLayout=QHBoxLayout()
         hLayout.addLayout(vLayout)
@@ -883,76 +895,142 @@ class ComprehensiveExperiment(QWidget):
         self.setLayout(hLayout)
 
     def calculate(self):
-        res = self.te.toPlainText().split("\n")
-        lr1=LR1()
-        lr1.setGrammar(res)
-        lr1Table = LR1Table(lr1)
-        transferArray=lr1Table.state_transfer_array
+        try:
+            res = self.te.toPlainText().split("\n")
+            lr1=LR1()
+            lr1.setGrammar(res)
+            lr1Table = LR1Table(lr1)
+            transferArray=lr1Table.state_transfer_array
 
-        inputList=list(self.analysisInput.toPlainText())
-        # 在最后加入'#'表示输入结束
-        inputList.append('#')
+            # 绘制语法树
+            imgUrl = 'outputImage//综合实验树形图' + str(uuid.uuid1())
+            g = Digraph(imgUrl, format="png")
+            nodeIndex=0
+            nodeList=[]
 
-        # 对文法进行分析
-        stateStack=Stack()
-        # 初始状态为0
-        stateStack.push(0)
-        
-        # 规约表达式
-        reduceSentences=[]
+            # 输入字符
+            inputList=list(self.analysisInput.toPlainText())
+            # 在最后加入'#'表示输入结束
+            inputList.append('#')
 
-        # 初始输入字符
-        curIndex=0
-        while True:
-            # 获取栈顶元素
-            curState=stateStack.peek()
-            curInput=inputList[curIndex]
+            # 对文法进行分析
+            stateStack=Stack()
+            # 初始状态为0
+            stateStack.push(0)
             
-            # 是否在action表中
-            # 判断是否存在，不存在直接报错
-            if (curState,curInput) in lr1Table.action:
-                nextAct=lr1Table.action[(curState,curInput)]
+            # 规约表达式
+            reduceSentences=[]
+
+            # 初始输入字符
+            curIndex=0
+            while True:
+                # 获取栈顶元素
+                curState=stateStack.peek()
+                curInput=inputList[curIndex]
                 
-                if nextAct.action == "shift":
-                    stateStack.push(nextAct.state)
-                    curIndex+=1
-                    print("接受输入"+curInput+",跳转到状态"+str(nextAct.state))
-                elif nextAct.action == "reduce":
-                    # 使用产生式A->β
-                    print("需要使用产生式"+str(nextAct.state)+"进行规约")
-                    print(lr1Table.lr1.grammarManager.sentences[nextAct.state])
-                    reduceSentence=lr1Table.lr1.grammarManager.sentences[nextAct.state]
-                    reduceSentences.append(reduceSentence)
-                    # 出栈|β|个状态
-                    popLength=len(reduceSentence[1])
-                    for i in range(popLength):
-                        stateStack.pop()
-                    # 获取栈顶元素t
-                    curState=stateStack.peek()
-                    print("当前状态为"+str(curState))
-                    # 获取goto[t,A]
-                    nextState=lr1Table.goto[(curState,reduceSentence[0])]
-                    # 将其加入栈中
-                    stateStack.push(nextState)
-                else:
-                    # success
-                    break
+                # 是否在action表中
+                # 判断是否存在，不存在直接报错
+                if (curState,curInput) in lr1Table.action:
+                    nextAct=lr1Table.action[(curState,curInput)]
+                    
+                    if nextAct.action == "shift":
+                        stateStack.push(nextAct.state)
+                        curIndex+=1
+                        print("接受输入"+curInput+",跳转到状态"+str(nextAct.state))
 
-        
-            else:
-                # 错误处理
-                raise Exception("错误!")
+                        # 移进，则往语法树中增加新的结点
+                        g.node(name=str(nodeIndex), label=curInput,shape="none")
+                        nodeList.append([nodeIndex,curInput])
+                        nodeIndex+=1
+                        print("nodeList新增结点"+str(nodeList))
+
+                    elif nextAct.action == "reduce":
+                        # 使用产生式A->β
+                        print("需要使用产生式"+str(nextAct.state)+"进行规约")
+                        print(lr1Table.lr1.grammarManager.sentences[nextAct.state])
+                        reduceSentence=lr1Table.lr1.grammarManager.sentences[nextAct.state]
+                        reduceSentences.append(reduceSentence)
+                        # 出栈|β|个状态
+                        popLength=len(reduceSentence[1])
+                        for i in range(popLength):
+                            stateStack.pop()
+                        # 获取栈顶元素t
+                        curState=stateStack.peek()
+                        print("当前状态为"+str(curState))
+                        # 获取goto[t,A]
+                        nextState=lr1Table.goto[(curState,reduceSentence[0])]
+                        # 将其加入栈中
+                        stateStack.push(nextState)
+
+                        # 规约，用A->β来绘图
+                        # 新增一个A
+                        g.node(name=str(nodeIndex), label=reduceSentence[0],shape="none")
+                        startIndex=nodeIndex
+
+                        # 寻找右侧β的每一个结点
+                        for i in list(reduceSentence[1]):
+                            findIndex=-1
+                            # 从右往左找
+                            for j in range(len(nodeList)-1,-1,-1):
+                                if nodeList[j][1]==i:
+                                    # 找到了
+                                    findIndex=j
+                                    break
+                            print("nodeList为"+str(nodeList))
+                            if findIndex==-1:
+                                raise Exception("绘图错误")
+                            
+                            # 获取该结点对应的编号
+                            endIndex=nodeList[findIndex][0]
+                            # 删除该结点
+                            del nodeList[findIndex]
+
+                            #连接边
+                            g.edge(str(startIndex), str(endIndex))
+
+                        # nodeList最后再加A->β中的A
+                        nodeList.append([nodeIndex,reduceSentence[0]])
+                        nodeIndex+=1
+
+                    else:
+                        # success
+                        break
+
             
-        # 加入到输出中
-        outputStr=""
-        for index,item in enumerate(reduceSentences):
-            if index!=0:
-                outputStr+="\n"
-            outputStr+=item[0]+"->"+item[1]
-        self.analysisOutput.setText(outputStr)
+                else:
+                    # 错误处理
+                    raise Exception("错误!")
+                
+            # 加入到输出中
+            outputStr=""
+            for index,item in enumerate(reduceSentences):
+                if index!=0:
+                    outputStr+="\n"
+                outputStr+=item[0]+"->"+item[1]
+            self.analysisOutput.setText(outputStr)
 
-        # 增加语法树
+            print(imgUrl)
+            g.render(imgUrl)
 
+            DFAImage = QPixmap(imgUrl+".png").scaledToHeight(500)
+            self.imageLabel.setPixmap(DFAImage)
+            self.g=g
+        except:
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("错误")
+            errorMessage.setText("输入有误，请检查您的输入！")
+            errorMessage.exec_()
+        
+
+    def saveImage(self):
+        if self.g==None:
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("错误")
+            errorMessage.setText("请先生成语法树！")
+            errorMessage.exec_()
+            return
+        self.g.view()
+                
         
 
     def getExample(self):
