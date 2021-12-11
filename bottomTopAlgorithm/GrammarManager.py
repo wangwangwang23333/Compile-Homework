@@ -53,6 +53,8 @@ class GrammarManager:
         self.sentences = []
         for i in range(len(sentences)):
             sentence = sentences[i].replace("│", "|").replace(' ', '').replace('\n', '').replace('\r', '')
+            if len(sentence)==0:
+                continue
             # 去除空格、换行符
             if "->" in sentence:
                 newSentence = sentence.split("->")

@@ -111,7 +111,7 @@ class WidgetUI1(QWidget):
             g=GrammarManager()
         
             res=self.te.toPlainText().split("\n")
-            g.getStr(res)
+            g.getStr(res,False)
 
             g.getFirstAndLastVT()
             self.outputArea.setText("FirstVT:\n"+str(g.FIRSTVT)+"\nLastVT:\n"+str(g.LASTVT))
