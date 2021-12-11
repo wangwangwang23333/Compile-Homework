@@ -18,6 +18,7 @@ from bottomTopAlgorithm.LRk_state_transfer_generation import LR0,LR1
 from bottomTopAlgorithm.LR0_analysis_table import LR0Table
 from bottomTopAlgorithm.LR1_analysis_table import LR1Table
 from bottomTopAlgorithm.LALR_analysis_table import LALRTable
+from bottomTopAlgorithm.stack import Stack
 
 class MainForm(QTabWidget):
     
@@ -46,6 +47,8 @@ class MainForm(QTabWidget):
         self.tab6=WidgetUI6()
         self.tab7=WidgetUI7()
         self.tab8=WidgetUI8()
+        self.tab9=WidgetUI9()
+        self.tab10=ComprehensiveExperiment()
         
         # 加入顶层窗口
         self.addTab(self.tab1,"算法3.1")
@@ -56,6 +59,9 @@ class MainForm(QTabWidget):
         self.addTab(self.tab6,"算法3.6")
         self.addTab(self.tab7,"算法3.7")
         self.addTab(self.tab8,"算法3.8")
+        self.addTab(self.tab9,"算法3.9")
+
+        self.addTab(self.tab10,"综合实验")
         
  
 class WidgetUI1(QWidget):
@@ -723,6 +729,235 @@ class WidgetUI8(QWidget):
     def getExample(self):
         self.te.setText("S'->S\nS->BB\nB->aB\nB->b")
 
+
+class WidgetUI9(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        # 文法输入框
+        self.te = QTextEdit()
+        self.te.setPlaceholderText("在此输入文法规则")
+        self.te.setFontFamily("幼圆")
+        self.te.setFontPointSize(20)
+
+        # 下拉框
+        self.cb=QComboBox()
+        self.cb.addItem("LR(0)")
+
+
+        # 计算按钮
+        self.dealButton=QPushButton(self)
+        self.dealButton.setText("构造LR分析表")
+        self.dealButton.clicked.connect(self.calculate)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.dealButton.setToolTip("根据识别文法活前缀的 DFA 构造 LR分析表")
+        self.dealButton.resize(self.dealButton.sizeHint())
+        # 范例按钮
+        self.exampleButton=QPushButton(self)
+        self.exampleButton.setText("范例")
+        self.exampleButton.clicked.connect(self.getExample)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.exampleButton.setToolTip("为了便于测试，我们准备了一个范例")
+        self.exampleButton.resize(self.exampleButton.sizeHint())
+
+        vLayout=QVBoxLayout()
+        vLayout.addWidget(self.te)
+        vLayout.addWidget(self.dealButton)
+        vLayout.addWidget(self.exampleButton)
+   
+        hLayout=QHBoxLayout()
+        hLayout.addLayout(vLayout)
+
+        # 表格1
+        actionVLayout=QVBoxLayout()
+        actionLabel=QLabel()
+        actionLabel.setAlignment(Qt.AlignCenter)
+        actionLabel.setFont(QFont("幼圆",20))
+        actionLabel.setText("ACTION")
+
+        self.tableView1=QTableView()
+        #水平方向，表格大小拓展到适当的尺寸
+        self.tableView1.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableView1.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableView1.horizontalHeader().setStretchLastSection(True)
+        self.tableView1.verticalHeader().setVisible(False)
+
+        actionVLayout.addWidget(actionLabel)
+        actionVLayout.addWidget(self.tableView1)
+
+        hLayout.addLayout(actionVLayout)
+
+        # 表格2
+        gotoVLayout=QVBoxLayout()
+        gotoLabel=QLabel()
+        gotoLabel.setAlignment(Qt.AlignCenter)
+        gotoLabel.setFont(QFont("幼圆",20))
+        gotoLabel.setText("GOTO")
+
+        self.tableView2=QTableView()
+        self.tableView2.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableView2.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableView2.horizontalHeader().setStretchLastSection(True)
+        self.tableView2.verticalHeader().setVisible(False)
+
+        gotoVLayout.addWidget(gotoLabel)
+        gotoVLayout.addWidget(self.tableView2)
+
+        hLayout.addLayout(gotoVLayout)
+
+        self.setLayout(hLayout)
+
+    def calculate(self):
+        pass
+
+    def getExample(self):
+        pass
+
+class ComprehensiveExperiment(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        # 文法输入框
+        self.te = QTextEdit()
+        self.te.setPlaceholderText("在此输入文法规则")
+        self.te.setFontFamily("幼圆")
+        self.te.setFontPointSize(20)
+
+        # 待分析语句
+        self.analysisInput=QTextEdit()
+        self.analysisInput.setPlaceholderText("在此输入待分析语句")
+        self.analysisInput.setFontFamily("幼圆")
+        self.analysisInput.setFontPointSize(20)
+
+        # 计算按钮
+        self.dealButton=QPushButton(self)
+        self.dealButton.setText("构造LR分析表")
+        self.dealButton.clicked.connect(self.calculate)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.dealButton.setToolTip("根据识别文法活前缀的 DFA 构造 LR分析表")
+        self.dealButton.resize(self.dealButton.sizeHint())
+        # 范例按钮
+        self.exampleButton=QPushButton(self)
+        self.exampleButton.setText("范例")
+        self.exampleButton.clicked.connect(self.getExample)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.exampleButton.setToolTip("为了便于测试，我们准备了一个范例")
+        self.exampleButton.resize(self.exampleButton.sizeHint())
+
+        vLayout=QVBoxLayout()
+        vLayout.addWidget(self.te)
+        vLayout.addWidget(self.analysisInput)
+        vLayout.addWidget(self.dealButton)
+        vLayout.addWidget(self.exampleButton)
+   
+        hLayout=QHBoxLayout()
+        hLayout.addLayout(vLayout)
+
+        # 表格1
+        analysisOutputVLayout=QVBoxLayout()
+        analysisOutputLabel=QLabel()
+        analysisOutputLabel.setAlignment(Qt.AlignCenter)
+        analysisOutputLabel.setFont(QFont("幼圆",20))
+        analysisOutputLabel.setText("规约过程产生式")
+
+        # 规约过程产生式
+        self.analysisOutput=QTextEdit()
+        self.analysisOutput.setPlaceholderText("暂无结果")
+        self.analysisOutput.setFontFamily("幼圆")
+        self.analysisOutput.setFontPointSize(20)
+        self.analysisOutput.setFocusPolicy(Qt.NoFocus)
+
+        analysisOutputVLayout.addWidget(analysisOutputLabel)
+        analysisOutputVLayout.addWidget(self.analysisOutput)
+
+        hLayout.addLayout(analysisOutputVLayout)
+
+        # 输出语法树
+        self.imageLabel = QLabel()
+        self.imageLabel.setText(" ")
+        self.imageLabel.setFixedHeight(500)
+        
+
+        hLayout.addWidget(self.imageLabel)
+
+        self.setLayout(hLayout)
+
+    def calculate(self):
+        res = self.te.toPlainText().split("\n")
+        lr1=LR1()
+        lr1.setGrammar(res)
+        lr1Table = LR1Table(lr1)
+        transferArray=lr1Table.state_transfer_array
+
+        inputList=list(self.analysisInput.toPlainText())
+        # 在最后加入'#'表示输入结束
+        inputList.append('#')
+
+        # 对文法进行分析
+        stateStack=Stack()
+        # 初始状态为0
+        stateStack.push(0)
+        
+        # 规约表达式
+        reduceSentences=[]
+
+        # 初始输入字符
+        curIndex=0
+        while True:
+            # 获取栈顶元素
+            curState=stateStack.peek()
+            curInput=inputList[curIndex]
+            
+            # 是否在action表中
+            # 判断是否存在，不存在直接报错
+            if (curState,curInput) in lr1Table.action:
+                nextAct=lr1Table.action[(curState,curInput)]
+                
+                if nextAct.action == "shift":
+                    stateStack.push(nextAct.state)
+                    curIndex+=1
+                    print("接受输入"+curInput+",跳转到状态"+str(nextAct.state))
+                elif nextAct.action == "reduce":
+                    # 使用产生式A->β
+                    print("需要使用产生式"+str(nextAct.state)+"进行规约")
+                    print(lr1Table.lr1.grammarManager.sentences[nextAct.state])
+                    reduceSentence=lr1Table.lr1.grammarManager.sentences[nextAct.state]
+                    reduceSentences.append(reduceSentence)
+                    # 出栈|β|个状态
+                    popLength=len(reduceSentence[1])
+                    for i in range(popLength):
+                        stateStack.pop()
+                    # 获取栈顶元素t
+                    curState=stateStack.peek()
+                    print("当前状态为"+str(curState))
+                    # 获取goto[t,A]
+                    nextState=lr1Table.goto[(curState,reduceSentence[0])]
+                    # 将其加入栈中
+                    stateStack.push(nextState)
+                else:
+                    # success
+                    break
+
+        
+            else:
+                # 错误处理
+                raise Exception("错误!")
+            
+        # 加入到输出中
+        outputStr=""
+        for index,item in enumerate(reduceSentences):
+            if index!=0:
+                outputStr+="\n"
+            outputStr+=item[0]+"->"+item[1]
+        self.analysisOutput.setText(outputStr)
+
+        # 增加语法树
+
+        
+
+    def getExample(self):
+        self.te.setText("E->E+T\nE->T\nT->T*F\nT->F\nF->(E)\nF->i")
+        self.analysisInput.setText("i+i*i")
 
 if __name__=='__main__':
     app=QApplication(sys.argv)

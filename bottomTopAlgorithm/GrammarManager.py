@@ -49,7 +49,7 @@ class GrammarManager:
         # print(self.sentences)
 
     # 给定字符串
-    def getStr(self, sentences):
+    def getStr(self, sentences, LRAnalysis = True):
         self.sentences = []
         for i in range(len(sentences)):
             sentence = sentences[i].replace("│", "|").replace(' ', '').replace('\n', '').replace('\r', '')
@@ -70,6 +70,11 @@ class GrammarManager:
             sentenceRightSide = newSentence[1].split("|")
             for i in sentenceRightSide:
                 self.sentences.append([newSentence[0], i])
+
+        # 增加拓广文法(LR文法需要)
+        if (not "'" in self.sentences[0][0]) and LRAnalysis:
+            print("手动增加了拓广文法")
+            self.sentences.insert(0, [self.sentences[0][0]+"'",self.sentences[0][0]])
 
         # 计算终结符和非终结符
         self.calculateVTandVN()
