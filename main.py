@@ -76,6 +76,7 @@ class WidgetUI1(QWidget):
         self.te.move(50,200)
         self.te.setFontFamily("幼圆")
         self.te.setFontPointSize(20)
+        self.te.setPlaceholderText("在此输入文法规则")
         label1=QLabel("输入文法规则",self)
         label1.move(50,170)
 
@@ -85,6 +86,7 @@ class WidgetUI1(QWidget):
         self.outputArea.setReadOnly(True)
         label2=QLabel("输出",self)
         label2.move(600,170)
+        self.outputArea.setPlaceholderText("此处为输出")
 
         self.dealButton=QPushButton(self)
         self.dealButton.setText("计算FirstVT和LastVT")
@@ -114,7 +116,15 @@ class WidgetUI1(QWidget):
             g.getStr(res,False)
 
             g.getFirstAndLastVT()
-            self.outputArea.setText("FirstVT:\n"+str(g.FIRSTVT)+"\nLastVT:\n"+str(g.LASTVT))
+            
+            outputStr="FirstVT:\n"
+            for i in g.FIRSTVT:
+                outputStr+=str(i)+":"+str(g.FIRSTVT[i])+"\n"
+
+            outputStr+="\nLastVT:\n"
+            for i in g.LASTVT:
+                outputStr+=str(i)+":"+str(g.LASTVT[i])+"\n"   
+            self.outputArea.setText(outputStr)
             print("res",res)
         except:
             errorMessage=QMessageBox()
