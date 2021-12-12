@@ -92,7 +92,7 @@ class OperatorPrecedenceGrammar:
         
 
         # 建立结点
-        imgUrl = "..//outputImage//实验3.3语法树" + str(uuid.uuid1())
+        imgUrl = "实验3.3语法树" + str(uuid.uuid1())
         g = Digraph(imgUrl, format="png")
         nodeIndex=0
         nodeList=[]
@@ -135,37 +135,39 @@ class OperatorPrecedenceGrammar:
                 # 规约的过程
                 # 规约，用A->β来绘图
                 # 新增一个A
-                g.node(name=str(nodeIndex), label=N,shape="none")
+                g.node(name=str(nodeIndex), label='N',shape="none")
                 startIndex=nodeIndex
 
                 # 寻找右侧β的每一个结点
                 print(M)
-                # for ix in list(M):
-                #     findIndex=-1
-                #     # 从右往左找
-                #     for jx in range(len(nodeList)-1,-1,-1):
-                #         if nodeList[jx][1]==ix:
-                #             # 找到了
-                #             findIndex=jx
-                #             break
-                #     print("nodeList为"+str(nodeList))
-                #     print("想要寻找"+ix)
-                #     print(str(nodeList))
-                #     if findIndex==-1:
-                #         break
-                #         raise Exception("绘图错误")
+                for ix in list(M):
+                    findIndex=-1
+
+                    # 如果ix为非终结符，则更改为寻找N
+                    if self.grammarManager.isVN(ix):
+                        ix='N'
+
+                    # 从右往左找
+                    for jx in range(len(nodeList)-1,-1,-1):
+                        if nodeList[jx][1]==ix:
+                            # 找到了
+                            findIndex=jx
+                            break
+
+                    if findIndex==-1:
+                        raise Exception("绘图错误")
                     
-                #     # 获取该结点对应的编号
-                #     endIndex=nodeList[findIndex][0]
-                #     # 删除该结点
-                #     del nodeList[findIndex]
+                    # 获取该结点对应的编号
+                    endIndex=nodeList[findIndex][0]
+                    # 删除该结点
+                    del nodeList[findIndex]
 
-                #     #连接边
-                #     g.edge(str(startIndex), str(endIndex))
+                    #连接边
+                    g.edge(str(startIndex), str(endIndex))
 
-                # # nodeList最后再加A->β中的A
-                # nodeList.append([nodeIndex,N])
-                # nodeIndex+=1
+                # nodeList最后再加A->β中的A
+                nodeList.append([nodeIndex,'N'])
+                nodeIndex+=1
 
                 print(symbol_stack.items)
             if priority_table[(symbol_stack.items[j],a)] == '<' or priority_table[(symbol_stack.items[j],a)] == '=':
@@ -184,7 +186,7 @@ class OperatorPrecedenceGrammar:
                 return "error!"
             
             strReader += 1
-        return g
+        return imgUrl,g
 
 
 

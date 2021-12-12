@@ -391,7 +391,7 @@ class WidgetUI3(QWidget):
         self.dealButton.setText("语法分析")
         self.dealButton.clicked.connect(self.calculate)
         QToolTip.setFont(QFont('SansSerif', 15))
-        self.dealButton.setToolTip("根据识别文法活前缀的 DFA 构造 LR(1)分析表，并对语法进行分析")
+        self.dealButton.setToolTip("为算符文法生成语法分析程序，并对语法进行分析")
         self.dealButton.resize(self.dealButton.sizeHint())
         # 范例按钮
         self.exampleButton=QPushButton(self)
@@ -423,7 +423,7 @@ class WidgetUI3(QWidget):
         analysisOutputLabel=QLabel()
         analysisOutputLabel.setAlignment(Qt.AlignCenter)
         analysisOutputLabel.setFont(QFont("幼圆",20))
-        analysisOutputLabel.setText("规约过程产生式")
+        analysisOutputLabel.setText("推导过程产生式")
 
         # 规约过程产生式
         self.analysisOutput=QTextEdit()
@@ -440,7 +440,7 @@ class WidgetUI3(QWidget):
         # 输出语法树
         self.imageLabel = QLabel()
         self.imageLabel.setText(" ")
-        self.imageLabel.setFixedHeight(500)
+        self.imageLabel.setFixedHeight(450)
         
 
         hLayout.addWidget(self.imageLabel)
@@ -452,11 +452,18 @@ class WidgetUI3(QWidget):
         opg=OperatorPrecedenceGrammar()
         opg.setGrammar(res)
         opg.getPriorityTable()
-        print(opg)
+
         
         inputText=self.analysisInput.toPlainText()
-        self.g=opg.operatorGrammarAnalysis(inputText)
-        print(opg.productionTable)
+        baseUrl,self.g=opg.operatorGrammarAnalysis(inputText)
+
+        baseUrl="outputImage//"+baseUrl
+        self.g.render(baseUrl)
+        self.imgUrl=baseUrl+".png"
+        
+        # 加载图片
+        DFAImage = QPixmap(self.imgUrl).scaledToHeight(450)
+        self.imageLabel.setPixmap(DFAImage)
 
         outputStr=""
         for index,item in enumerate(opg.productionTable):
