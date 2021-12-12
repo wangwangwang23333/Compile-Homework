@@ -752,9 +752,11 @@ class WidgetUI9(QWidget):
         self.te.setFontFamily("幼圆")
         self.te.setFontPointSize(20)
 
-        # 下拉框
-        self.cb=QComboBox()
-        self.cb.addItem("LR(0)")
+        # 待分析语句
+        self.analysisInput=QTextEdit()
+        self.analysisInput.setPlaceholderText("在此输入待分析语句")
+        self.analysisInput.setFontFamily("幼圆")
+        self.analysisInput.setFontPointSize(20)
 
 
         # 计算按钮
@@ -772,13 +774,32 @@ class WidgetUI9(QWidget):
         self.exampleButton.setToolTip("为了便于测试，我们准备了一个范例")
         self.exampleButton.resize(self.exampleButton.sizeHint())
 
+        # 按钮
+        buttonHLayout=QHBoxLayout()
+        self.addRowButton=QPushButton()
+        self.addRowButton.setText("添加一行")
+        self.addRowButton.clicked.connect(self.addRow)
+        buttonHLayout.addWidget(self.addRowButton)
+        self.removeRowButton=QPushButton()
+        self.removeRowButton.setText("删除一行")
+        self.removeRowButton.clicked.connect(self.removeRow)
+        buttonHLayout.addWidget(self.removeRowButton)
+
         vLayout=QVBoxLayout()
         vLayout.addWidget(self.te)
+        vLayout.addWidget(self.analysisInput)
         vLayout.addWidget(self.dealButton)
         vLayout.addWidget(self.exampleButton)
+        vLayout.addLayout(buttonHLayout)
    
         hLayout=QHBoxLayout()
         hLayout.addLayout(vLayout)
+
+        # 建立一个竖直方向的layout
+        tableVLayout=QVBoxLayout()
+
+        # 建立一个表格的水平layout
+        tableHLayout=QHBoxLayout()
 
         # 表格1
         actionVLayout=QVBoxLayout()
@@ -797,7 +818,7 @@ class WidgetUI9(QWidget):
         actionVLayout.addWidget(actionLabel)
         actionVLayout.addWidget(self.tableView1)
 
-        hLayout.addLayout(actionVLayout)
+        tableHLayout.addLayout(actionVLayout)
 
         # 表格2
         gotoVLayout=QVBoxLayout()
@@ -815,7 +836,23 @@ class WidgetUI9(QWidget):
         gotoVLayout.addWidget(gotoLabel)
         gotoVLayout.addWidget(self.tableView2)
 
-        hLayout.addLayout(gotoVLayout)
+        tableHLayout.addLayout(gotoVLayout)
+
+        #表格竖直视图
+        tableVLayout.addLayout(tableHLayout)
+
+        # 表格下方加入文法分析结果
+        self.analysisOutput=QTextEdit()
+        self.analysisOutput.setPlaceholderText("暂无结果")
+        self.analysisOutput.setFontFamily("幼圆")
+        self.analysisOutput.setFontPointSize(20)
+        self.analysisOutput.setFocusPolicy(Qt.NoFocus)
+
+        tableVLayout.addWidget(self.analysisOutput)
+
+
+        hLayout.addLayout(tableVLayout)
+
 
         self.setLayout(hLayout)
 
@@ -823,6 +860,12 @@ class WidgetUI9(QWidget):
         pass
 
     def getExample(self):
+        pass
+
+    def addRow(self):
+        pass
+
+    def removeRow(self):
         pass
 
 class ComprehensiveExperiment(QWidget):
