@@ -42,24 +42,25 @@ class LALRTable:
         reduce_set = set()
         reduce_list_state = copy.deepcopy(self.lr1_states)
         transfer_array = copy.deepcopy(self.lr1_state_transfer_array)
-        for index_i, i in enumerate(reduce_list_state):
+        for index_i, state in enumerate(reduce_list_state):
             if index_i in reduce_set:
                 continue
             merge_flag = False
             for index_j, j in enumerate(reduce_list_state):
                 # 跳过本身相同的项和已经被排除的项
-                if i == j or index_j in reduce_set:
+                if state == j or index_j in reduce_set:
                     continue
-                if LALRTable._compare_state_discarding_lft(i, j):
+                if LALRTable._compare_state_discarding_lft(state, j):
                     # i j 是相同的状态，只是展望符不同。
-                    new_states.append(LALRTable._merge_two_states(i, j))
+                    if LALRTable._merge_two_states(state, j) not in new_states:
+                        new_states.append(LALRTable._merge_two_states(state, j))
                     reduce_set.add(index_j)
                     for state_i, v in self.lr1_state_transfer_array.items():
                         if v == index_j:
                             transfer_array[state_i] = index_i
                     merge_flag = True
             if not merge_flag:
-                new_states.append(i)
+                new_states.append(state)
         self.get_LALR_transfer_array(reduce_set, transfer_array)
         self.states = new_states
         return new_states
