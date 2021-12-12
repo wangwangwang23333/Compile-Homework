@@ -326,6 +326,29 @@ class GrammarManager:
         # 从0开始，本身就是数组下标
         return self.sentences.index(s)
 
+    '''
+    给定一个句子，将其进行规约
+    返回成功规约的文法串
+    '''
+    def statute_sentence(self,sentence_pattern):
+        result_set = ""
+        print(self.sentences)
+        for grammar_sentence in self.sentences:
+            compare_sentence = grammar_sentence[1]
+            if len(compare_sentence) == len(sentence_pattern):
+                math_tag = 1
+                for i in range(0,len(compare_sentence)):
+                    if (sentence_pattern[i] in self.VT and sentence_pattern[i] == compare_sentence[i]) or (sentence_pattern[i] not in self.VT and compare_sentence[i] in self.VN ):  # 终结符对终结符，非终结符对非终结符
+                        continue
+                    else:
+                        math_tag = 0
+                if math_tag == 1:
+                    result_set = grammar_sentence[0]+"→"+grammar_sentence[1]
+        return result_set
+
+
+
+
 
 if __name__ == '__main__':
     g = GrammarManager()
