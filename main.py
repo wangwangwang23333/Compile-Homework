@@ -872,8 +872,105 @@ class WidgetUI9(QWidget):
 
     def calculate(self):
         # 计算
+        # 绘制语法树
+        imgUrl = 'outputImage//实验9语法树' + str(uuid.uuid1())
+        g = Digraph(imgUrl, format="png")
+        nodeIndex=0
+        nodeList=[]
 
-        pass
+        # 输入字符
+        inputList=list(self.analysisInput.toPlainText())
+        # 在最后加入'#'表示输入结束
+        inputList.append('#')
+
+        # 对文法进行分析
+        stateStack=Stack()
+        # 初始状态为0
+        stateStack.push(0)
+        
+        # 规约表达式
+        reduceSentences=[]
+
+        # 初始输入字符
+        curIndex=0
+        while True:
+            # 获取栈顶元素
+            curState=stateStack.peek()
+            curInput=inputList[curIndex]
+            
+            print((curState,curInput))
+            # 获取curInput在VT中的位置
+            
+            break
+            
+
+            # 是否在action表中
+            # 判断是否存在，不存在直接报错
+            if (curState,curInput) in lr1Table.action:
+                nextAct=lr1Table.action[(curState,curInput)]
+                
+                if nextAct.action == "shift":
+                    stateStack.push(nextAct.state)
+                    curIndex+=1
+                    print("接受输入"+curInput+",跳转到状态"+str(nextAct.state))
+
+                    # 移进，则往语法树中增加新的结点
+                    g.node(name=str(nodeIndex), label=curInput,shape="none")
+                    nodeList.append([nodeIndex,curInput])
+                    nodeIndex+=1
+                    print("nodeList新增结点"+str(nodeList))
+
+                elif nextAct.action == "reduce":
+                    # 使用产生式A->β
+                    print("需要使用产生式"+str(nextAct.state)+"进行规约")
+                    print(lr1Table.lr1.grammarManager.sentences[nextAct.state])
+                    reduceSentence=lr1Table.lr1.grammarManager.sentences[nextAct.state]
+                    reduceSentences.append(reduceSentence)
+                    # 出栈|β|个状态
+                    popLength=len(reduceSentence[1])
+                    for i in range(popLength):
+                        stateStack.pop()
+                    # 获取栈顶元素t
+                    curState=stateStack.peek()
+                    print("当前状态为"+str(curState))
+                    # 获取goto[t,A]
+                    nextState=lr1Table.goto[(curState,reduceSentence[0])]
+                    # 将其加入栈中
+                    stateStack.push(nextState)
+
+                    # 规约，用A->β来绘图
+                    # 新增一个A
+                    g.node(name=str(nodeIndex), label=reduceSentence[0],shape="none")
+                    startIndex=nodeIndex
+
+                    # 寻找右侧β的每一个结点
+                    for i in list(reduceSentence[1]):
+                        findIndex=-1
+                        # 从右往左找
+                        for j in range(len(nodeList)-1,-1,-1):
+                            if nodeList[j][1]==i:
+                                # 找到了
+                                findIndex=j
+                                break
+                        print("nodeList为"+str(nodeList))
+                        if findIndex==-1:
+                            raise Exception("绘图错误")
+                        
+                        # 获取该结点对应的编号
+                        endIndex=nodeList[findIndex][0]
+                        # 删除该结点
+                        del nodeList[findIndex]
+
+                        #连接边
+                        g.edge(str(startIndex), str(endIndex))
+
+                    # nodeList最后再加A->β中的A
+                    nodeList.append([nodeIndex,reduceSentence[0]])
+                    nodeIndex+=1
+
+                else:
+                    # success
+                    break
 
     def getExample(self):
         self.te.setText("S->E\nE->E+T\nE->T\nT->T*F\nT->F\nF->(E)\nF->i")
@@ -882,7 +979,62 @@ class WidgetUI9(QWidget):
         self.analysisGrammar()
 
         # 填充Action和Goto表
+
+        # 0~11行 + * ( ) i #
+        self.model1.setItem(0,4,QStandardItem("s5")) # i
+        self.model1.setItem(0,2,QStandardItem("s4")) # (
+        self.model1.setItem(1,0,QStandardItem("s6")) # +
+        self.model1.setItem(1,5,QStandardItem("acc")) # #
+        self.model1.setItem(2,0,QStandardItem("r2")) # +
+        self.model1.setItem(2,1,QStandardItem("s7")) # *
+        self.model1.setItem(2,3,QStandardItem("r2")) # )
+        self.model1.setItem(2,5,QStandardItem("r2")) # #
+        self.model1.setItem(3,0,QStandardItem("r4")) # +
+        self.model1.setItem(3,1,QStandardItem("r4")) # *
+        self.model1.setItem(3,3,QStandardItem("r4")) # )
+        self.model1.setItem(3,5,QStandardItem("r4")) # #
+        self.model1.setItem(4,4,QStandardItem("s5")) # i
+        self.model1.setItem(4,2,QStandardItem("s4")) # (
+        self.model1.setItem(5,0,QStandardItem("r6")) # +
+        self.model1.setItem(5,1,QStandardItem("r6")) # *
+        self.model1.setItem(5,3,QStandardItem("r6")) # )
+        self.model1.setItem(5,5,QStandardItem("r6")) # #
+        self.model1.setItem(6,4,QStandardItem("s5")) # i
+        self.model1.setItem(6,2,QStandardItem("s4")) # (
+        self.model1.setItem(7,4,QStandardItem("s5")) # i
+        self.model1.setItem(7,2,QStandardItem("s4")) # (
+        self.model1.setItem(8,0,QStandardItem("s6")) # +
+        self.model1.setItem(8,3,QStandardItem("s11")) # )
+        self.model1.setItem(9,0,QStandardItem("r1")) # +
+        self.model1.setItem(9,1,QStandardItem("s7")) # *
+        self.model1.setItem(9,3,QStandardItem("r1")) # )
+        self.model1.setItem(9,5,QStandardItem("r1")) # #
+        self.model1.setItem(10,0,QStandardItem("r3")) # +
+        self.model1.setItem(10,1,QStandardItem("r3")) # *
+        self.model1.setItem(10,3,QStandardItem("r3")) # )
+        self.model1.setItem(10,5,QStandardItem("r3")) # #
+        self.model1.setItem(11,0,QStandardItem("r5")) # +
+        self.model1.setItem(11,1,QStandardItem("r5")) # *
+        self.model1.setItem(11,3,QStandardItem("r5")) # )
+        self.model1.setItem(11,5,QStandardItem("r5")) # #
         
+
+        self.model2.setItem(0,1,QStandardItem("1"))
+        self.model2.setItem(0,2,QStandardItem("2"))
+        self.model2.setItem(0,3,QStandardItem("3"))
+        self.model2.setItem(4,1,QStandardItem("8"))
+        self.model2.setItem(4,2,QStandardItem("2"))
+        self.model2.setItem(4,3,QStandardItem("3"))
+        self.model2.setItem(6,2,QStandardItem("9"))
+        self.model2.setItem(6,3,QStandardItem("3"))
+        self.model2.setItem(7,3,QStandardItem("10"))
+
+        self.model1.setVerticalHeaderLabels([str(i) for i in range(12)])
+        self.model2.setVerticalHeaderLabels([str(i) for i in range(12)])
+
+        self.curTableRow=12
+        
+
 
     def addRow(self):
         for row in range(self.curTableRow,self.curTableRow+1):
@@ -900,7 +1052,6 @@ class WidgetUI9(QWidget):
         self.curTableRow-=1
         self.model1.removeRow(self.curTableRow)
         self.model2.removeRow(self.curTableRow)
-        pass
     
     def analysisGrammar(self):
         res = self.te.toPlainText().split("\n")
