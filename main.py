@@ -465,7 +465,7 @@ class WidgetUI3(QWidget):
             outputStr+=item
         self.analysisOutput.setText(outputStr)
         
-        self.g.view()
+        # self.g.view()
 
     def saveImage(self):
         if self.g==None:
