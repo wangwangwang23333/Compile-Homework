@@ -760,12 +760,23 @@ class WidgetUI9(QWidget):
 
 
         # 计算按钮
-        self.dealButton=QPushButton(self)
-        self.dealButton.setText("解析文法")
-        self.dealButton.clicked.connect(self.analysisGrammar)
+        calculateHLayout=QHBoxLayout()
+        self.analysisButton=QPushButton(self)
+        self.analysisButton.setText("解析文法")
+        self.analysisButton.clicked.connect(self.analysisGrammar)
         QToolTip.setFont(QFont('SansSerif', 15))
-        self.dealButton.setToolTip("解析文法，产生状态表")
-        self.dealButton.resize(self.dealButton.sizeHint())
+        self.analysisButton.setToolTip("解析文法，产生状态表初始状态")
+        self.analysisButton.resize(self.analysisButton.sizeHint())
+        calculateHLayout.addWidget(self.analysisButton)
+
+        self.dealButton=QPushButton()
+        self.dealButton.setText("语法分析")
+        self.dealButton.clicked.connect(self.calculate)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.dealButton.setToolTip("解析文法，产生状态表初始状态")
+        calculateHLayout.addWidget(self.dealButton)
+        self.dealButton.setEnabled(False)
+
 
         # 范例按钮
         self.exampleButton=QPushButton(self)
@@ -791,7 +802,7 @@ class WidgetUI9(QWidget):
         vLayout=QVBoxLayout()
         vLayout.addWidget(self.te)
         vLayout.addWidget(self.analysisInput)
-        vLayout.addWidget(self.dealButton)
+        vLayout.addLayout(calculateHLayout)
         vLayout.addWidget(self.exampleButton)
         vLayout.addLayout(buttonHLayout)
    
@@ -860,27 +871,47 @@ class WidgetUI9(QWidget):
         self.setLayout(hLayout)
 
     def calculate(self):
+        # 计算
+
         pass
 
     def getExample(self):
         self.te.setText("S->E\nE->E+T\nE->T\nT->T*F\nT->F\nF->(E)\nF->i")
         self.analysisInput.setText("i+i*i")
 
+        self.analysisGrammar()
+
+        # 填充Action和Goto表
+        
+
     def addRow(self):
-        pass
+        for row in range(self.curTableRow,self.curTableRow+1):
+            for col in range(len(self.grammarManager.VT)+1):
+                item=QStandardItem("")
+                self.model1.setItem(row,col,item)
+            for col in range(len(self.grammarManager.VN)):
+                item=QStandardItem("")
+                self.model2.setItem(row,col,item)
+        self.curTableRow+=1
+        self.model1.setVerticalHeaderLabels([str(i) for i in range(self.curTableRow)])
+        self.model2.setVerticalHeaderLabels([str(i) for i in range(self.curTableRow)])
 
     def removeRow(self):
+        self.curTableRow-=1
+        self.model1.removeRow(self.curTableRow)
+        self.model2.removeRow(self.curTableRow)
         pass
     
     def analysisGrammar(self):
         res = self.te.toPlainText().split("\n")
         self.grammarManager=GrammarManager()
-        self.grammarManager.getStr(res)
+        self.grammarManager.getStr(res,False)
         print(self.grammarManager.VT)
         print(self.grammarManager.VN)
 
         ## ACTION表
         self.model1=QStandardItemModel(1, len(self.grammarManager.VT)+1)
+        self.model1.setVerticalHeaderLabels(['0'])
         self.model1.setHorizontalHeaderLabels(self.grammarManager.VT+['#'])
     
         for row in range(1):
@@ -891,7 +922,22 @@ class WidgetUI9(QWidget):
         self.tableView1.setModel(self.model1)
 
         ### GOTO表
+        self.model2=QStandardItemModel(1, len(self.grammarManager.VN))
+        self.model2.setVerticalHeaderLabels(['0'])
+        self.model2.setHorizontalHeaderLabels(self.grammarManager.VN)
+    
+        for row in range(1):
+            for col in range(len(self.grammarManager.VN)):
+                item=QStandardItem("")
+                self.model2.setItem(row,col,item)
         
+        self.tableView2.setModel(self.model2)
+
+        self.curTableRow=1
+
+        self.addRowButton.setEnabled(True)
+        self.removeRowButton.setEnabled(True)
+        self.dealButton.setEnabled(True)
 
 class ComprehensiveExperiment(QWidget):
     def __init__(self):
