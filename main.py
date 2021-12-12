@@ -1007,7 +1007,7 @@ class WidgetUI9(QWidget):
         try:
             # 计算
             # 绘制语法树
-            imgUrl = 'outputImage//实验9语法树' + str(uuid.uuid1())
+            imgUrl = 'outputImage//实验3.9语法树' + str(uuid.uuid1())
             g = Digraph(imgUrl, format="png")
             nodeIndex=0
             nodeList=[]
@@ -1364,7 +1364,7 @@ class ComprehensiveExperiment(QWidget):
             transferArray=lr1Table.state_transfer_array
 
             # 绘制语法树
-            imgUrl = 'outputImage//综合实验树形图' + str(uuid.uuid1())
+            imgUrl = 'outputImage//综合实验语法树' + str(uuid.uuid1())
             g = Digraph(imgUrl, format="png")
             nodeIndex=0
             nodeList=[]
