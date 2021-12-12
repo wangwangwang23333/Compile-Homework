@@ -2,7 +2,7 @@
 """
 Created on Sat Dec  4 22:09:34 2021
 
-@author: 12094
+@author: 1851055 汪明杰
 """
 import sys
 from PyQt5.QtWidgets import *
@@ -371,6 +371,116 @@ class WidgetUI4(QWidget):
 class WidgetUI3(QWidget):
     def __init__(self):
         super().__init__()
+
+        self.g=None
+
+        # 文法输入框
+        self.te = QTextEdit()
+        self.te.setPlaceholderText("在此输入文法规则")
+        self.te.setFontFamily("幼圆")
+        self.te.setFontPointSize(20)
+
+        # 待分析语句
+        self.analysisInput=QTextEdit()
+        self.analysisInput.setPlaceholderText("在此输入待分析语句")
+        self.analysisInput.setFontFamily("幼圆")
+        self.analysisInput.setFontPointSize(20)
+
+        # 计算按钮
+        self.dealButton=QPushButton(self)
+        self.dealButton.setText("语法分析")
+        self.dealButton.clicked.connect(self.calculate)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.dealButton.setToolTip("根据识别文法活前缀的 DFA 构造 LR(1)分析表，并对语法进行分析")
+        self.dealButton.resize(self.dealButton.sizeHint())
+        # 范例按钮
+        self.exampleButton=QPushButton(self)
+        self.exampleButton.setText("范例")
+        self.exampleButton.clicked.connect(self.getExample)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.exampleButton.setToolTip("为了便于测试，我们准备了一个范例")
+        self.exampleButton.resize(self.exampleButton.sizeHint())
+
+        self.saveButton=QPushButton(self)
+        self.saveButton.setText("保存图片")
+        self.saveButton.clicked.connect(self.saveImage)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.saveButton.setToolTip("您可以保存生成的语法树")
+        self.saveButton.resize(self.saveButton.sizeHint())
+
+        vLayout=QVBoxLayout()
+        vLayout.addWidget(self.te)
+        vLayout.addWidget(self.analysisInput)
+        vLayout.addWidget(self.dealButton)
+        vLayout.addWidget(self.exampleButton)
+        vLayout.addWidget(self.saveButton)
+   
+        hLayout=QHBoxLayout()
+        hLayout.addLayout(vLayout)
+
+        # 表格1
+        analysisOutputVLayout=QVBoxLayout()
+        analysisOutputLabel=QLabel()
+        analysisOutputLabel.setAlignment(Qt.AlignCenter)
+        analysisOutputLabel.setFont(QFont("幼圆",20))
+        analysisOutputLabel.setText("规约过程产生式")
+
+        # 规约过程产生式
+        self.analysisOutput=QTextEdit()
+        self.analysisOutput.setPlaceholderText("暂无结果")
+        self.analysisOutput.setFontFamily("幼圆")
+        self.analysisOutput.setFontPointSize(20)
+        self.analysisOutput.setFocusPolicy(Qt.NoFocus)
+
+        analysisOutputVLayout.addWidget(analysisOutputLabel)
+        analysisOutputVLayout.addWidget(self.analysisOutput)
+
+        hLayout.addLayout(analysisOutputVLayout)
+
+        # 输出语法树
+        self.imageLabel = QLabel()
+        self.imageLabel.setText(" ")
+        self.imageLabel.setFixedHeight(500)
+        
+
+        hLayout.addWidget(self.imageLabel)
+
+        self.setLayout(hLayout)
+
+    def calculate(self):
+        res = self.te.toPlainText().split("\n")
+        opg=OperatorPrecedenceGrammar()
+        opg.setGrammar(res)
+        opg.getPriorityTable()
+        print(opg)
+        
+        inputText=self.analysisInput.toPlainText()
+        self.g=opg.operatorGrammarAnalysis(inputText)
+        print(opg.productionTable)
+
+        outputStr=""
+        for index,item in enumerate(opg.productionTable):
+            if index!=0:
+                outputStr+="\n"
+            outputStr+=item
+        self.analysisOutput.setText(outputStr)
+        
+        self.g.view()
+
+    def saveImage(self):
+        if self.g==None:
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("错误")
+            errorMessage.setText("请先生成语法树！")
+            errorMessage.exec_()
+            return
+        self.g.view()
+                
+        
+
+    def getExample(self):
+        self.te.setText("E->E+T|T\nT->T*F|F\nF->P↑F|P\nP->(E)|i")
+        self.analysisInput.setText("i+i*i")
 
 class WidgetUI5(QWidget):
     def __init__(self):

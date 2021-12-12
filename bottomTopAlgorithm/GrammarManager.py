@@ -346,10 +346,6 @@ class GrammarManager:
                     result_set = grammar_sentence[0]+"→"+grammar_sentence[1]
         return result_set
 
-
-
-
-
 if __name__ == '__main__':
     g = GrammarManager()
     g.getInput()

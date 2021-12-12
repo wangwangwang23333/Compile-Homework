@@ -9,7 +9,8 @@ Created on Sun Dec  5 01:03:06 2021
 
 from bottomTopAlgorithm.GrammarManager import GrammarManager
 from bottomTopAlgorithm.stack import Stack
-
+from graphviz import Digraph
+import uuid
 
 class OperatorPrecedenceGrammar:
 
@@ -25,7 +26,7 @@ class OperatorPrecedenceGrammar:
         self.productionTable = []
 
     def setGrammar(self,sentences):
-        self.grammarManager.getStr(sentences)
+        self.grammarManager.getStr(sentences,False)
 
     '''
     为算符文法生成算符之间的优先关系表
@@ -84,10 +85,17 @@ class OperatorPrecedenceGrammar:
         j = 0
         # 需要添加#和任何符号的算符优先关系，#<任何算符
         priority_table = self.priorityTable
-        for str in self.grammarManager.VT:
-            priority_table[('#',str)] = '<'
-            priority_table[(str,'#')] = '>'
+        for vt in self.grammarManager.VT:
+            priority_table[('#',vt)] = '<'
+            priority_table[(vt,'#')] = '>'
             priority_table[('#','#')] = '='
+        
+
+        # 建立结点
+        imgUrl = "..//outputImage//实验3.3语法树" + str(uuid.uuid1())
+        g = Digraph(imgUrl, format="png")
+        nodeIndex=0
+        nodeList=[]
 
         while True:
             # 获取栈顶算符，k为栈顶
@@ -111,32 +119,72 @@ class OperatorPrecedenceGrammar:
                 statute_str = self.grammarManager.statute_sentence(symbol_stack.items[j+1:stack_iterator+1])
                 self.productionTable.append(statute_str)
                 N = ''
+                M = ''
                 if '->' in statute_str:
+                    M = statute_str.split('->')[1]
                     N = statute_str.split('->')[0]
                 else:
+                    M = statute_str.split('→')[1]
                     N = statute_str.split('→')[0]
                 for i in range(stack_iterator-j):
                     symbol_stack.pop()
                 stack_iterator = j + 1
                 symbol_stack.push(N)
+
+                # 此处勿动，为暂未完成的绘图板块
+                # 规约的过程
+                # 规约，用A->β来绘图
+                # 新增一个A
+                g.node(name=str(nodeIndex), label=N,shape="none")
+                startIndex=nodeIndex
+
+                # 寻找右侧β的每一个结点
+                print(M)
+                # for ix in list(M):
+                #     findIndex=-1
+                #     # 从右往左找
+                #     for jx in range(len(nodeList)-1,-1,-1):
+                #         if nodeList[jx][1]==ix:
+                #             # 找到了
+                #             findIndex=jx
+                #             break
+                #     print("nodeList为"+str(nodeList))
+                #     print("想要寻找"+ix)
+                #     print(str(nodeList))
+                #     if findIndex==-1:
+                #         break
+                #         raise Exception("绘图错误")
+                    
+                #     # 获取该结点对应的编号
+                #     endIndex=nodeList[findIndex][0]
+                #     # 删除该结点
+                #     del nodeList[findIndex]
+
+                #     #连接边
+                #     g.edge(str(startIndex), str(endIndex))
+
+                # # nodeList最后再加A->β中的A
+                # nodeList.append([nodeIndex,N])
+                # nodeIndex+=1
+
                 print(symbol_stack.items)
             if priority_table[(symbol_stack.items[j],a)] == '<' or priority_table[(symbol_stack.items[j],a)] == '=':
                 stack_iterator = stack_iterator+1
                 symbol_stack.push(a)
+
+                if a == "#":
+                    break
+
+                # 添加新结点
+                g.node(name=str(nodeIndex), label=a,shape="none")
+                nodeList.append([nodeIndex,a])
+                nodeIndex+=1
+                print("nodeList新增结点"+str(nodeList))
             else:
                 return "error!"
-            if a == "#":
-                break
+            
             strReader += 1
-        return "success!"
-
-
-
-
-
-
-
-
+        return g
 
 
 
