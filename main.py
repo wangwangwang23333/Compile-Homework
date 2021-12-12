@@ -731,8 +731,7 @@ class WidgetUI8(QWidget):
             self.tableView2.setModel(self.model2)
             print(self.model2)
             
-        except error:
-            print(error)
+        except:
             errorMessage=QMessageBox()
             errorMessage.setWindowTitle("错误")
             errorMessage.setText("输入有误，请检查您的输入！")
@@ -745,6 +744,8 @@ class WidgetUI8(QWidget):
 class WidgetUI9(QWidget):
     def __init__(self):
         super().__init__()
+
+        self.g=None
 
         # 文法输入框
         self.te = QTextEdit()
@@ -786,6 +787,13 @@ class WidgetUI9(QWidget):
         self.exampleButton.setToolTip("为了便于测试，我们准备了一个范例")
         self.exampleButton.resize(self.exampleButton.sizeHint())
 
+        self.saveButton=QPushButton(self)
+        self.saveButton.setText("保存图片")
+        self.saveButton.clicked.connect(self.saveImage)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.saveButton.setToolTip("您可以保存生成的语法树")
+        self.saveButton.resize(self.saveButton.sizeHint())
+
         # 按钮
         buttonHLayout=QHBoxLayout()
         self.addRowButton=QPushButton()
@@ -804,6 +812,7 @@ class WidgetUI9(QWidget):
         vLayout.addWidget(self.analysisInput)
         vLayout.addLayout(calculateHLayout)
         vLayout.addWidget(self.exampleButton)
+        vLayout.addWidget(self.saveButton)
         vLayout.addLayout(buttonHLayout)
    
         hLayout=QHBoxLayout()
@@ -867,52 +876,61 @@ class WidgetUI9(QWidget):
 
         hLayout.addLayout(tableVLayout)
 
+        # 输出语法树
+        self.imageLabel = QLabel()
+        self.imageLabel.setText(" ")
+        self.imageLabel.setFixedHeight(500)
+
+        hLayout.addWidget(self.imageLabel)
+
 
         self.setLayout(hLayout)
 
     def calculate(self):
-        # 计算
-        # 绘制语法树
-        imgUrl = 'outputImage//实验9语法树' + str(uuid.uuid1())
-        g = Digraph(imgUrl, format="png")
-        nodeIndex=0
-        nodeList=[]
+        try:
+            # 计算
+            # 绘制语法树
+            imgUrl = 'outputImage//实验9语法树' + str(uuid.uuid1())
+            g = Digraph(imgUrl, format="png")
+            nodeIndex=0
+            nodeList=[]
 
-        # 输入字符
-        inputList=list(self.analysisInput.toPlainText())
-        # 在最后加入'#'表示输入结束
-        inputList.append('#')
+            # 输入字符
+            inputList=list(self.analysisInput.toPlainText())
+            # 在最后加入'#'表示输入结束
+            inputList.append('#')
 
-        # 对文法进行分析
-        stateStack=Stack()
-        # 初始状态为0
-        stateStack.push(0)
-        
-        # 规约表达式
-        reduceSentences=[]
-
-        # 初始输入字符
-        curIndex=0
-        while True:
-            # 获取栈顶元素
-            curState=stateStack.peek()
-            curInput=inputList[curIndex]
+            # 对文法进行分析
+            stateStack=Stack()
+            # 初始状态为0
+            stateStack.push(0)
             
-            print((curState,curInput))
-            # 获取curInput在VT中的位置
-            
-            break
-            
+            # 规约表达式
+            reduceSentences=[]
 
-            # 是否在action表中
-            # 判断是否存在，不存在直接报错
-            if (curState,curInput) in lr1Table.action:
-                nextAct=lr1Table.action[(curState,curInput)]
+            # 初始输入字符
+            curIndex=0
+            while True:
+                # 获取栈顶元素
+                curState=stateStack.peek()
+                curInput=inputList[curIndex]
                 
-                if nextAct.action == "shift":
-                    stateStack.push(nextAct.state)
+                print((curState,curInput))
+                # 获取curInput在VT中的位置
+                curInputCol=self.VT.index(curInput)
+
+                print(self.model1.item(curState,curInputCol).text())
+
+                # 获取其对应的act
+                nextAct=self.model1.item(curState,curInputCol).text()
+
+                if nextAct=="":
+                    raise Exception("错误的输入")    
+                
+                if nextAct[0] == "s":
+                    stateStack.push(int(nextAct[1:]))
                     curIndex+=1
-                    print("接受输入"+curInput+",跳转到状态"+str(nextAct.state))
+                    print("接受输入"+curInput+",跳转到状态"+nextAct[1:])
 
                     # 移进，则往语法树中增加新的结点
                     g.node(name=str(nodeIndex), label=curInput,shape="none")
@@ -920,11 +938,11 @@ class WidgetUI9(QWidget):
                     nodeIndex+=1
                     print("nodeList新增结点"+str(nodeList))
 
-                elif nextAct.action == "reduce":
+                elif nextAct[0] == "r":
                     # 使用产生式A->β
-                    print("需要使用产生式"+str(nextAct.state)+"进行规约")
-                    print(lr1Table.lr1.grammarManager.sentences[nextAct.state])
-                    reduceSentence=lr1Table.lr1.grammarManager.sentences[nextAct.state]
+                    print("需要使用产生式"+nextAct[1:]+"进行规约")
+                    print(self.grammarManager.sentences[int(nextAct[1:])])
+                    reduceSentence=self.grammarManager.sentences[int(nextAct[1:])]
                     reduceSentences.append(reduceSentence)
                     # 出栈|β|个状态
                     popLength=len(reduceSentence[1])
@@ -932,9 +950,14 @@ class WidgetUI9(QWidget):
                         stateStack.pop()
                     # 获取栈顶元素t
                     curState=stateStack.peek()
-                    print("当前状态为"+str(curState))
+                    print("当前状态为"+str(curState)+",正在接收输入"+reduceSentence[0])
+                    
+                    print(self.VN.index(reduceSentence[0]))
+                    
                     # 获取goto[t,A]
-                    nextState=lr1Table.goto[(curState,reduceSentence[0])]
+                    nextState=self.model2.item(curState,self.VN.index(reduceSentence[0])).text()
+                    nextState=int(nextState)
+
                     # 将其加入栈中
                     stateStack.push(nextState)
 
@@ -971,6 +994,26 @@ class WidgetUI9(QWidget):
                 else:
                     # success
                     break
+            
+            print(reduceSentences)
+            # 加入到输出中
+            outputStr=""
+            for index,item in enumerate(reduceSentences):
+                if index!=0:
+                    outputStr+="\n"
+                outputStr+=item[0]+"->"+item[1]
+            self.analysisOutput.setText(outputStr)
+
+            g.render(imgUrl)
+
+            DFAImage = QPixmap(imgUrl+".png").scaledToHeight(500)
+            self.imageLabel.setPixmap(DFAImage)
+            self.g=g
+        except:
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("错误")
+            errorMessage.setText("输入有误，请检查您的输入！")
+            errorMessage.exec_()
 
     def getExample(self):
         self.te.setText("S->E\nE->E+T\nE->T\nT->T*F\nT->F\nF->(E)\nF->i")
@@ -1049,46 +1092,72 @@ class WidgetUI9(QWidget):
         self.model2.setVerticalHeaderLabels([str(i) for i in range(self.curTableRow)])
 
     def removeRow(self):
+        if self.curTableRow == 0:
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("错误")
+            errorMessage.setText("当前只有一行，无法继续删除！")
+            errorMessage.exec_()
+            return
+
         self.curTableRow-=1
         self.model1.removeRow(self.curTableRow)
         self.model2.removeRow(self.curTableRow)
     
     def analysisGrammar(self):
-        res = self.te.toPlainText().split("\n")
-        self.grammarManager=GrammarManager()
-        self.grammarManager.getStr(res,False)
-        print(self.grammarManager.VT)
-        print(self.grammarManager.VN)
+        try:
+            res = self.te.toPlainText().split("\n")
+            self.grammarManager=GrammarManager()
+            self.grammarManager.getStr(res,False)
+            print(self.grammarManager.VT)
+            print(self.grammarManager.VN)
 
-        ## ACTION表
-        self.model1=QStandardItemModel(1, len(self.grammarManager.VT)+1)
-        self.model1.setVerticalHeaderLabels(['0'])
-        self.model1.setHorizontalHeaderLabels(self.grammarManager.VT+['#'])
-    
-        for row in range(1):
-            for col in range(len(self.grammarManager.VT)+1):
-                item=QStandardItem("")
-                self.model1.setItem(row,col,item)
+            ## ACTION表
+            self.model1=QStandardItemModel(1, len(self.grammarManager.VT)+1)
+            self.model1.setVerticalHeaderLabels(['0'])
+            self.model1.setHorizontalHeaderLabels(self.grammarManager.VT+['#'])
+
+            # 记录，便于后续处理
+            self.VT=self.grammarManager.VT+['#']
+            self.VN=self.grammarManager.VN
         
-        self.tableView1.setModel(self.model1)
+            for row in range(1):
+                for col in range(len(self.grammarManager.VT)+1):
+                    item=QStandardItem("")
+                    self.model1.setItem(row,col,item)
+            
+            self.tableView1.setModel(self.model1)
 
-        ### GOTO表
-        self.model2=QStandardItemModel(1, len(self.grammarManager.VN))
-        self.model2.setVerticalHeaderLabels(['0'])
-        self.model2.setHorizontalHeaderLabels(self.grammarManager.VN)
-    
-        for row in range(1):
-            for col in range(len(self.grammarManager.VN)):
-                item=QStandardItem("")
-                self.model2.setItem(row,col,item)
+            ### GOTO表
+            self.model2=QStandardItemModel(1, len(self.grammarManager.VN))
+            self.model2.setVerticalHeaderLabels(['0'])
+            self.model2.setHorizontalHeaderLabels(self.grammarManager.VN)
         
-        self.tableView2.setModel(self.model2)
+            for row in range(1):
+                for col in range(len(self.grammarManager.VN)):
+                    item=QStandardItem("")
+                    self.model2.setItem(row,col,item)
+            
+            self.tableView2.setModel(self.model2)
 
-        self.curTableRow=1
+            self.curTableRow=1
 
-        self.addRowButton.setEnabled(True)
-        self.removeRowButton.setEnabled(True)
-        self.dealButton.setEnabled(True)
+            self.addRowButton.setEnabled(True)
+            self.removeRowButton.setEnabled(True)
+            self.dealButton.setEnabled(True)
+        except:
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("错误")
+            errorMessage.setText("请输入合理的文法产生式！")
+            errorMessage.exec_()
+
+    def saveImage(self):
+        if self.g==None:
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("错误")
+            errorMessage.setText("请先生成语法树！")
+            errorMessage.exec_()
+            return
+        self.g.view()
 
 class ComprehensiveExperiment(QWidget):
     def __init__(self):
