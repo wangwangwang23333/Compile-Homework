@@ -752,18 +752,32 @@ class WidgetUI9(QWidget):
         self.te.setFontFamily("幼圆")
         self.te.setFontPointSize(20)
 
-        # 下拉框
-        self.cb=QComboBox()
-        self.cb.addItem("LR(0)")
+        # 待分析语句
+        self.analysisInput=QTextEdit()
+        self.analysisInput.setPlaceholderText("在此输入待分析语句")
+        self.analysisInput.setFontFamily("幼圆")
+        self.analysisInput.setFontPointSize(20)
 
 
         # 计算按钮
-        self.dealButton=QPushButton(self)
-        self.dealButton.setText("构造LR分析表")
+        calculateHLayout=QHBoxLayout()
+        self.analysisButton=QPushButton(self)
+        self.analysisButton.setText("解析文法")
+        self.analysisButton.clicked.connect(self.analysisGrammar)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.analysisButton.setToolTip("解析文法，产生状态表初始状态")
+        self.analysisButton.resize(self.analysisButton.sizeHint())
+        calculateHLayout.addWidget(self.analysisButton)
+
+        self.dealButton=QPushButton()
+        self.dealButton.setText("语法分析")
         self.dealButton.clicked.connect(self.calculate)
         QToolTip.setFont(QFont('SansSerif', 15))
-        self.dealButton.setToolTip("根据识别文法活前缀的 DFA 构造 LR分析表")
-        self.dealButton.resize(self.dealButton.sizeHint())
+        self.dealButton.setToolTip("解析文法，产生状态表初始状态")
+        calculateHLayout.addWidget(self.dealButton)
+        self.dealButton.setEnabled(False)
+
+
         # 范例按钮
         self.exampleButton=QPushButton(self)
         self.exampleButton.setText("范例")
@@ -772,13 +786,34 @@ class WidgetUI9(QWidget):
         self.exampleButton.setToolTip("为了便于测试，我们准备了一个范例")
         self.exampleButton.resize(self.exampleButton.sizeHint())
 
+        # 按钮
+        buttonHLayout=QHBoxLayout()
+        self.addRowButton=QPushButton()
+        self.addRowButton.setText("添加一行")
+        self.addRowButton.clicked.connect(self.addRow)
+        self.addRowButton.setEnabled(False)
+        buttonHLayout.addWidget(self.addRowButton)
+        self.removeRowButton=QPushButton()
+        self.removeRowButton.setText("删除一行")
+        self.removeRowButton.clicked.connect(self.removeRow)
+        self.removeRowButton.setEnabled(False)
+        buttonHLayout.addWidget(self.removeRowButton)
+
         vLayout=QVBoxLayout()
         vLayout.addWidget(self.te)
-        vLayout.addWidget(self.dealButton)
+        vLayout.addWidget(self.analysisInput)
+        vLayout.addLayout(calculateHLayout)
         vLayout.addWidget(self.exampleButton)
+        vLayout.addLayout(buttonHLayout)
    
         hLayout=QHBoxLayout()
         hLayout.addLayout(vLayout)
+
+        # 建立一个竖直方向的layout
+        tableVLayout=QVBoxLayout()
+
+        # 建立一个表格的水平layout
+        tableHLayout=QHBoxLayout()
 
         # 表格1
         actionVLayout=QVBoxLayout()
@@ -790,14 +825,14 @@ class WidgetUI9(QWidget):
         self.tableView1=QTableView()
         #水平方向，表格大小拓展到适当的尺寸
         self.tableView1.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.tableView1.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # self.tableView1.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableView1.horizontalHeader().setStretchLastSection(True)
-        self.tableView1.verticalHeader().setVisible(False)
+        # self.tableView1.verticalHeader().setVisible(False)
 
         actionVLayout.addWidget(actionLabel)
         actionVLayout.addWidget(self.tableView1)
 
-        hLayout.addLayout(actionVLayout)
+        tableHLayout.addLayout(actionVLayout)
 
         # 表格2
         gotoVLayout=QVBoxLayout()
@@ -808,22 +843,101 @@ class WidgetUI9(QWidget):
 
         self.tableView2=QTableView()
         self.tableView2.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.tableView2.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # self.tableView2.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableView2.horizontalHeader().setStretchLastSection(True)
-        self.tableView2.verticalHeader().setVisible(False)
+        # self.tableView2.verticalHeader().setVisible(False)
 
         gotoVLayout.addWidget(gotoLabel)
         gotoVLayout.addWidget(self.tableView2)
 
-        hLayout.addLayout(gotoVLayout)
+        tableHLayout.addLayout(gotoVLayout)
+
+        #表格竖直视图
+        tableVLayout.addLayout(tableHLayout)
+
+        # 表格下方加入文法分析结果
+        self.analysisOutput=QTextEdit()
+        self.analysisOutput.setPlaceholderText("暂无结果")
+        self.analysisOutput.setFontFamily("幼圆")
+        self.analysisOutput.setFontPointSize(20)
+        self.analysisOutput.setFocusPolicy(Qt.NoFocus)
+
+        tableVLayout.addWidget(self.analysisOutput)
+
+
+        hLayout.addLayout(tableVLayout)
+
 
         self.setLayout(hLayout)
 
     def calculate(self):
+        # 计算
+
         pass
 
     def getExample(self):
+        self.te.setText("S->E\nE->E+T\nE->T\nT->T*F\nT->F\nF->(E)\nF->i")
+        self.analysisInput.setText("i+i*i")
+
+        self.analysisGrammar()
+
+        # 填充Action和Goto表
+        
+
+    def addRow(self):
+        for row in range(self.curTableRow,self.curTableRow+1):
+            for col in range(len(self.grammarManager.VT)+1):
+                item=QStandardItem("")
+                self.model1.setItem(row,col,item)
+            for col in range(len(self.grammarManager.VN)):
+                item=QStandardItem("")
+                self.model2.setItem(row,col,item)
+        self.curTableRow+=1
+        self.model1.setVerticalHeaderLabels([str(i) for i in range(self.curTableRow)])
+        self.model2.setVerticalHeaderLabels([str(i) for i in range(self.curTableRow)])
+
+    def removeRow(self):
+        self.curTableRow-=1
+        self.model1.removeRow(self.curTableRow)
+        self.model2.removeRow(self.curTableRow)
         pass
+    
+    def analysisGrammar(self):
+        res = self.te.toPlainText().split("\n")
+        self.grammarManager=GrammarManager()
+        self.grammarManager.getStr(res,False)
+        print(self.grammarManager.VT)
+        print(self.grammarManager.VN)
+
+        ## ACTION表
+        self.model1=QStandardItemModel(1, len(self.grammarManager.VT)+1)
+        self.model1.setVerticalHeaderLabels(['0'])
+        self.model1.setHorizontalHeaderLabels(self.grammarManager.VT+['#'])
+    
+        for row in range(1):
+            for col in range(len(self.grammarManager.VT)+1):
+                item=QStandardItem("")
+                self.model1.setItem(row,col,item)
+        
+        self.tableView1.setModel(self.model1)
+
+        ### GOTO表
+        self.model2=QStandardItemModel(1, len(self.grammarManager.VN))
+        self.model2.setVerticalHeaderLabels(['0'])
+        self.model2.setHorizontalHeaderLabels(self.grammarManager.VN)
+    
+        for row in range(1):
+            for col in range(len(self.grammarManager.VN)):
+                item=QStandardItem("")
+                self.model2.setItem(row,col,item)
+        
+        self.tableView2.setModel(self.model2)
+
+        self.curTableRow=1
+
+        self.addRowButton.setEnabled(True)
+        self.removeRowButton.setEnabled(True)
+        self.dealButton.setEnabled(True)
 
 class ComprehensiveExperiment(QWidget):
     def __init__(self):
