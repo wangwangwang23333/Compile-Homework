@@ -448,29 +448,36 @@ class WidgetUI3(QWidget):
         self.setLayout(hLayout)
 
     def calculate(self):
-        res = self.te.toPlainText().split("\n")
-        opg=OperatorPrecedenceGrammar()
-        opg.setGrammar(res)
-        opg.getPriorityTable()
+        try:
+            res = self.te.toPlainText().split("\n")
+            opg=OperatorPrecedenceGrammar()
+            opg.setGrammar(res)
+            opg.getPriorityTable()
 
-        
-        inputText=self.analysisInput.toPlainText()
-        baseUrl,self.g=opg.operatorGrammarAnalysis(inputText)
+            
+            inputText=self.analysisInput.toPlainText()
+            baseUrl,self.g=opg.operatorGrammarAnalysis(inputText)
 
-        baseUrl="outputImage//"+baseUrl
-        self.g.render(baseUrl)
-        self.imgUrl=baseUrl+".png"
-        
-        # 加载图片
-        DFAImage = QPixmap(self.imgUrl).scaledToHeight(450)
-        self.imageLabel.setPixmap(DFAImage)
+            baseUrl="outputImage//"+baseUrl
+            self.g.render(baseUrl)
+            self.imgUrl=baseUrl+".png"
+            
+            # 加载图片
+            DFAImage = QPixmap(self.imgUrl).scaledToHeight(450)
+            self.imageLabel.setPixmap(DFAImage)
 
-        outputStr=""
-        for index,item in enumerate(opg.productionTable):
-            if index!=0:
-                outputStr+="\n"
-            outputStr+=item
-        self.analysisOutput.setText(outputStr)
+            outputStr=""
+            for index,item in enumerate(opg.productionTable):
+                if index!=0:
+                    outputStr+="\n"
+                outputStr+=item
+            self.analysisOutput.setText(outputStr)
+        except:
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("错误")
+            errorMessage.setText("输入有误，请检查您的输入！")
+            errorMessage.exec_()
+
         
         # self.g.view()
 
