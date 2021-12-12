@@ -761,11 +761,12 @@ class WidgetUI9(QWidget):
 
         # 计算按钮
         self.dealButton=QPushButton(self)
-        self.dealButton.setText("构造LR分析表")
-        self.dealButton.clicked.connect(self.calculate)
+        self.dealButton.setText("解析文法")
+        self.dealButton.clicked.connect(self.analysisGrammar)
         QToolTip.setFont(QFont('SansSerif', 15))
-        self.dealButton.setToolTip("根据识别文法活前缀的 DFA 构造 LR分析表")
+        self.dealButton.setToolTip("解析文法，产生状态表")
         self.dealButton.resize(self.dealButton.sizeHint())
+
         # 范例按钮
         self.exampleButton=QPushButton(self)
         self.exampleButton.setText("范例")
@@ -779,10 +780,12 @@ class WidgetUI9(QWidget):
         self.addRowButton=QPushButton()
         self.addRowButton.setText("添加一行")
         self.addRowButton.clicked.connect(self.addRow)
+        self.addRowButton.setEnabled(False)
         buttonHLayout.addWidget(self.addRowButton)
         self.removeRowButton=QPushButton()
         self.removeRowButton.setText("删除一行")
         self.removeRowButton.clicked.connect(self.removeRow)
+        self.removeRowButton.setEnabled(False)
         buttonHLayout.addWidget(self.removeRowButton)
 
         vLayout=QVBoxLayout()
@@ -811,9 +814,9 @@ class WidgetUI9(QWidget):
         self.tableView1=QTableView()
         #水平方向，表格大小拓展到适当的尺寸
         self.tableView1.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.tableView1.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # self.tableView1.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableView1.horizontalHeader().setStretchLastSection(True)
-        self.tableView1.verticalHeader().setVisible(False)
+        # self.tableView1.verticalHeader().setVisible(False)
 
         actionVLayout.addWidget(actionLabel)
         actionVLayout.addWidget(self.tableView1)
@@ -829,9 +832,9 @@ class WidgetUI9(QWidget):
 
         self.tableView2=QTableView()
         self.tableView2.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.tableView2.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # self.tableView2.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tableView2.horizontalHeader().setStretchLastSection(True)
-        self.tableView2.verticalHeader().setVisible(False)
+        # self.tableView2.verticalHeader().setVisible(False)
 
         gotoVLayout.addWidget(gotoLabel)
         gotoVLayout.addWidget(self.tableView2)
@@ -860,13 +863,35 @@ class WidgetUI9(QWidget):
         pass
 
     def getExample(self):
-        pass
+        self.te.setText("S->E\nE->E+T\nE->T\nT->T*F\nT->F\nF->(E)\nF->i")
+        self.analysisInput.setText("i+i*i")
 
     def addRow(self):
         pass
 
     def removeRow(self):
         pass
+    
+    def analysisGrammar(self):
+        res = self.te.toPlainText().split("\n")
+        self.grammarManager=GrammarManager()
+        self.grammarManager.getStr(res)
+        print(self.grammarManager.VT)
+        print(self.grammarManager.VN)
+
+        ## ACTION表
+        self.model1=QStandardItemModel(1, len(self.grammarManager.VT)+1)
+        self.model1.setHorizontalHeaderLabels(self.grammarManager.VT+['#'])
+    
+        for row in range(1):
+            for col in range(len(self.grammarManager.VT)+1):
+                item=QStandardItem("")
+                self.model1.setItem(row,col,item)
+        
+        self.tableView1.setModel(self.model1)
+
+        ### GOTO表
+        
 
 class ComprehensiveExperiment(QWidget):
     def __init__(self):
