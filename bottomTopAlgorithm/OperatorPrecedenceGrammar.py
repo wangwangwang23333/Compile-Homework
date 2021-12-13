@@ -201,9 +201,14 @@ class OperatorPrecedenceGrammar:
 
 if __name__ == '__main__':
     opg = OperatorPrecedenceGrammar()
-    sentences=["E->E+T|T","T->T*F|F","F->P↑F|P","P->(E)|i"]
+    sentences=["S->E","E->E+T","E->T","T->T*F","T->F","F->(E)","F->i"]
     opg.grammarManager.getStr(sentences)
-    opg.getPriorityTable()
-    print(opg.priorityTable)
-    opg.operatorGrammarAnalysis("i+i*i")
-    print(opg.getReduceStringArray())  # productionTable即算符优先文法过程依次使用的文法串
+    print(sentences,opg.grammarManager.sentences)
+    #opg.getPriorityTable()
+    #print(opg.priorityTable)
+    #opg.operatorGrammarAnalysis("i+i*i")
+    opg.grammarManager.getBasicFirstSet()
+    print("first",opg.grammarManager.basicFirstSet)
+    opg.grammarManager.calculate_follow();
+    print(opg.grammarManager.FOLLOWSET)
+    #print(opg.getReduceStringArray())  # productionTable即算符优先文法过程依次使用的文法串
