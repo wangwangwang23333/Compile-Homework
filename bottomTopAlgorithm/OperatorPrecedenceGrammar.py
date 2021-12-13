@@ -188,6 +188,15 @@ class OperatorPrecedenceGrammar:
             strReader += 1
         return imgUrl,g
 
+    '''
+    获取生成语法分析树所需的归约串数组
+    '''
+    def getReduceStringArray(self):
+        reduce_string_array = []
+        for reduce_string in self.productionTable:
+            reduce_string = reduce_string.split('→')
+            reduce_string_array.append(reduce_string)
+        return reduce_string_array
 
 
 if __name__ == '__main__':
@@ -197,4 +206,4 @@ if __name__ == '__main__':
     opg.getPriorityTable()
     print(opg.priorityTable)
     opg.operatorGrammarAnalysis("i+i*i")
-    print(opg.productionTable)
+    print(opg.getReduceStringArray())  # productionTable即算符优先文法过程依次使用的文法串
