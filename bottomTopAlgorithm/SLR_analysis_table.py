@@ -62,8 +62,8 @@ class SLRTable:
                             continue
                 # 条件3:S'->S·属于Ik
                 if 'S\'' in project_sentence[0] and 'S' in project_sentence[1] and project_sentence[2] == 1:
-                    self.action[Ik_set][self.VT.index('#')-1][0] = 'acc'
-                    self.action[Ik_set][self.VT.index('#')-1][1] = -1
+                    self.action[Ik_set][self.VT.index('#')][0] = 'acc'
+                    self.action[Ik_set][self.VT.index('#')][1] = -1
         # 条件4：直接遍历状态转移字典
         for go_key in self.lr0.translationArray.keys():
             if go_key[1] in self.VN:
