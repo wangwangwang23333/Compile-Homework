@@ -691,7 +691,16 @@ class WidgetUI6(QWidget):
     def calculate(self):
         try:
             res = self.te.toPlainText().split("\n")
+            slr_table = SLRTable(res)
+            print(slr_table.VT)
+            print(slr_table.VN)
+            slr_table.get_SLR_analysis_table()
+            print(slr_table.action[0])
+            print(len(slr_table.action[0]))
+            print(slr_table.goto)
+
             lr0table=LR0Table(res)
+            
             lr0table.getVisibleLR0Table()
 
             self.model1=QStandardItemModel(len(lr0table.visibleTable_VT)-1,
