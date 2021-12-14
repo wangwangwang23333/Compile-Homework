@@ -201,8 +201,8 @@ class OperatorPrecedenceGrammar:
 
 if __name__ == '__main__':
     opg = OperatorPrecedenceGrammar()
-    sentences=["S->E","E->E+T","E->T","T->T*F","T->F","F->(E)","F->i"]
-    opg.grammarManager.getStr(sentences)
+    sentences=["E->TR","R->+TR","R->ε ","T->FY","Y->*FY","Y->ε","F->(E)","F->i"]
+    opg.grammarManager.getStr(sentences,False)
     print(sentences,opg.grammarManager.sentences)
     #opg.getPriorityTable()
     #print(opg.priorityTable)

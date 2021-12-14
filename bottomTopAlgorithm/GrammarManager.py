@@ -398,9 +398,12 @@ class GrammarManager:
         result = []
         for VN_symbol in self.VN:
             if VN_symbol in sentence[1]:
-                new_sentence = sentence[1].split(VN_symbol)
-                if len(new_sentence) == 2 and new_sentence[1] != '':
-                    result.append([VN_symbol, new_sentence[1]])
+                for index_vn in range(len(sentence[1])):
+                    if sentence[1][index_vn] == VN_symbol:
+                        ind = sentence[1].find(VN_symbol,index_vn)
+                        if ind != -1:
+                            result.append([VN_symbol, sentence[1][ind+1:]])
+
         return result
 
 
