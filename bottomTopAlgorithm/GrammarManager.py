@@ -78,7 +78,7 @@ class GrammarManager:
         if (not "'" in self.sentences[0][0]) and LRAnalysis:
             print("手动增加了拓广文法")
             self.sentences.insert(0, [self.sentences[0][0]+"'",self.sentences[0][0]])
-
+        print("结果为",self.sentences)
         # 计算终结符和非终结符
         self.calculateVTandVN()
 
@@ -260,7 +260,7 @@ class GrammarManager:
 
         # 接下来遍历sentences然后逐一进行处理入栈
         for sentence in self.sentences:
-
+            sentence = sentence.copy()
             # 这里要先进行处理:
             if choice == "LAST":
                 tmp = sentence[1]

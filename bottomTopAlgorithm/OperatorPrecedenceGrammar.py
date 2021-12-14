@@ -33,13 +33,15 @@ class OperatorPrecedenceGrammar:
     '''
 
     def getPriorityTable(self):
-
+        print(self.grammarManager.sentences)
         if len(self.grammarManager.FIRSTVT) == 0:
             self.grammarManager.getFirstAndLastVT()
 
         # 遍历每一个产生式
+        #print(self.grammarManager.sentences)
         for sentence in self.grammarManager.sentences:
             # sentence[1]
+            #print(sentence)
             for i in range(len(sentence[1]) - 1):
                 # sentence[1][i] 和 sentence[1][i+1]的关系
 
