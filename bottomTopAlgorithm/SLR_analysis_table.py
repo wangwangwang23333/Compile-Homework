@@ -19,9 +19,9 @@ class SLRTable:
         self.VN = self.lr0.grammarManager.VN
         self.VT = self.lr0.grammarManager.VT
         self.VT.append('#')
-        self.action = [[["", -1] for i in range(len(self.VT) + 1)] for j in
+        self.action = [[["", -1] for i in range(len(self.VT))] for j in
                        range(len(self.lr0.states))]
-        self.goto = [[-1 for i in range(len(self.VN) - 1)] for j in range(len(self.lr0.states))]
+        self.goto = [[-1 for i in range(len(self.VN))] for j in range(len(self.lr0.states))]
         #  初始状态action表每个表位置元素均为['',-1],每个goto表状态均为-1
         # 计算follow集合
         self.lr0.grammarManager.calculate_follow()
@@ -79,3 +79,6 @@ if __name__ == '__main__':
     slr_table.get_SLR_analysis_table()
     print(slr_table.action)
     print(slr_table.goto)
+    print(len(slr_table.action[0]))
+    print(slr_table.VN)
+    print(len(slr_table.goto[0]))
