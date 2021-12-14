@@ -6,6 +6,7 @@ from bottomTopAlgorithm.LRk_state_transfer_generation import LR1
 from bottomTopAlgorithm.action import Action
 import copy
 
+
 class LR1Table:
     """
     LR1 分析表构造类
@@ -16,6 +17,7 @@ class LR1Table:
         self.lr1 = lr1
         self.lr1.calculateDFA()
         self.state_transfer_array = self.lr1.get_numbered_and_looking_forward_transfer_array()
+        self.states = self.lr1.get_merged_looking_forward_string()
         self.action = dict()
         self.goto = dict()
         self.get_analysis_table()
@@ -105,6 +107,33 @@ class LR1Table:
             return self.table_VN.index(v) + len(self.table_VT) + 1
         return self.table_VT.index(v) + 1
 
+    def get_state_str(self, index):
+        # 输出states[index]的字符串
+
+        item = self.states[index]
+        showLabel = ""
+        # str(index)+"     "
+        for jndex, j in enumerate(item):
+            if jndex != 0:
+                showLabel += "\n"
+            showLabel += j[0] + "->"
+            for t in range(len(j[1])):
+                if t == j[2]:
+                    showLabel += "·"
+                showLabel += j[1][t]
+            if j[2] >= len(j[1]):
+                showLabel += "·"
+            showLabel += ","
+            lfts = copy.deepcopy(j[3])
+            lfts.sort()
+            for index_lft, lft in enumerate(lfts):
+                if index_lft != 0:
+                    showLabel += '|'
+                showLabel += lft
+            if len(j) == 5:
+                showLabel += "[" + str(j[4]) + ']'
+        return showLabel
+
 
 """
 测试：
@@ -124,4 +153,7 @@ if __name__ == "__main__":
     lr1.grammarManager.getInput()
     table = LR1Table(lr1)
     table.show()
-
+    for i in range(len(table.states)):
+        print("State", str(i) + ":")
+        print(table.get_state_str(i))
+        print()

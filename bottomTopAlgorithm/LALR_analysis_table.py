@@ -1,6 +1,8 @@
 from bottomTopAlgorithm.LRk_state_transfer_generation import LR1
 from bottomTopAlgorithm.action import Action
 import copy
+from graphviz import Digraph
+import uuid
 
 
 class LALRTable:
@@ -52,12 +54,18 @@ class LALRTable:
                     continue
                 if LALRTable._compare_state_discarding_lft(state, j):
                     # i j 是相同的状态，只是展望符不同。
-                    if LALRTable._merge_two_states(state, j) not in new_states:
-                        new_states.append(LALRTable._merge_two_states(state, j))
+                    merged_state = LALRTable._merge_two_states(state, j)
+                    if merged_state not in new_states:
+                        new_states.append(merged_state)
+                        for s in merged_state:
+                            if len(s) > 4:
+                                transfer_array[(index_i, "no")] = s[4]
+                                transfer_array[(index_i, "lft")] = s[3]
                     reduce_set.add(index_j)
                     for state_i, v in self.lr1_state_transfer_array.items():
-                        if v == index_j:
+                        if v == index_j and str(state_i[1]).isnumeric():
                             transfer_array[state_i] = index_i
+
                     merge_flag = True
             if not merge_flag:
                 new_states.append(state)
@@ -131,10 +139,13 @@ class LALRTable:
                 if state_item1[:3] == state_item2[:3]:
                     lft = list(set(state_item1[3]).union(set(state_item2[3])))
                     state_item_merged.append(lft)
+                    # print("1", state_item1)
+                    # print("2", state_item2)
                     if len(state_item1) == 5:
                         state_item_merged.append(state_item1[4])
-                    if len(state_item2) == 5:
+                    elif len(state_item2) == 5:
                         state_item_merged.append(state_item2[4])
+                    # print("merged: ", state_item_merged)
             new_state.append(state_item_merged)
         return new_state
 
@@ -165,6 +176,7 @@ class LALRTable:
                 row = pos[0]
                 lft = self.state_transfer_array[(row, "lft")]
                 for s in lft:
+                    # print(s)
                     if len(self.lr1.grammarManager.sentences[state][0]) == 1:
                         self.action[(row, s)] = Action(state, "reduce")
                     else:
@@ -240,16 +252,25 @@ class LALRTable:
             if j[2] >= len(j[1]):
                 showLabel += "·"
             showLabel += ","
-            lfts=copy.deepcopy(j[3])
+            lfts = copy.deepcopy(j[3])
             lfts.sort()
             for index_lft, lft in enumerate(lfts):
                 if index_lft != 0:
                     showLabel += '|'
                 showLabel += lft
-
+            if len(j) >= 5:
+                showLabel += "[" + str(j[4]) + ']'
         return showLabel
 
 
+'''
+tests:
+4
+S'->S
+S->BB
+B->aB
+B->b
+'''
 if __name__ == "__main__":
     lr1 = LR1()
     lr1.grammarManager.getInput()
