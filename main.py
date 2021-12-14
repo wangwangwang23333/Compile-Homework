@@ -16,6 +16,7 @@ from bottomTopAlgorithm.GrammarManager import GrammarManager
 from bottomTopAlgorithm.OperatorPrecedenceGrammar import OperatorPrecedenceGrammar
 from bottomTopAlgorithm.LRk_state_transfer_generation import LR0,LR1
 from bottomTopAlgorithm.LR0_analysis_table import LR0Table
+from bottomTopAlgorithm.SLR_analysis_table import SLRTable
 from bottomTopAlgorithm.LR1_analysis_table import LR1Table
 from bottomTopAlgorithm.LALR_analysis_table import LALRTable
 from bottomTopAlgorithm.stack import Stack
@@ -617,6 +618,120 @@ class WidgetUI5(QWidget):
 class WidgetUI6(QWidget):
     def __init__(self):
         super().__init__()
+
+        # 文法输入框
+        self.te = QTextEdit()
+        self.te.setPlaceholderText("在此输入文法规则")
+        self.te.setFontFamily("幼圆")
+        self.te.setFontPointSize(20)
+
+        # 计算按钮
+        self.dealButton=QPushButton(self)
+        self.dealButton.setText("构造SLR分析表")
+        self.dealButton.clicked.connect(self.calculate)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.dealButton.setToolTip("根据识别文法活前缀的 DFA 构造 SLR分析表")
+        self.dealButton.resize(self.dealButton.sizeHint())
+        # 范例按钮
+        self.exampleButton=QPushButton(self)
+        self.exampleButton.setText("范例")
+        self.exampleButton.clicked.connect(self.getExample)
+        QToolTip.setFont(QFont('SansSerif', 15))
+        self.exampleButton.setToolTip("为了便于测试，我们准备了一个范例")
+        self.exampleButton.resize(self.exampleButton.sizeHint())
+
+        vLayout=QVBoxLayout()
+        vLayout.addWidget(self.te)
+        vLayout.addWidget(self.dealButton)
+        vLayout.addWidget(self.exampleButton)
+   
+        hLayout=QHBoxLayout()
+        hLayout.addLayout(vLayout)
+
+        # 表格1
+        actionVLayout=QVBoxLayout()
+        actionLabel=QLabel()
+        actionLabel.setAlignment(Qt.AlignCenter)
+        actionLabel.setFont(QFont("幼圆",20))
+        actionLabel.setText("ACTION")
+
+        self.tableView1=QTableView()
+        #水平方向，表格大小拓展到适当的尺寸
+        self.tableView1.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableView1.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableView1.horizontalHeader().setStretchLastSection(True)
+        self.tableView1.verticalHeader().setVisible(False)
+
+        actionVLayout.addWidget(actionLabel)
+        actionVLayout.addWidget(self.tableView1)
+
+        hLayout.addLayout(actionVLayout)
+
+        # 表格2
+        gotoVLayout=QVBoxLayout()
+        gotoLabel=QLabel()
+        gotoLabel.setAlignment(Qt.AlignCenter)
+        gotoLabel.setFont(QFont("幼圆",20))
+        gotoLabel.setText("GOTO")
+
+        self.tableView2=QTableView()
+        self.tableView2.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableView2.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableView2.horizontalHeader().setStretchLastSection(True)
+        self.tableView2.verticalHeader().setVisible(False)
+
+        gotoVLayout.addWidget(gotoLabel)
+        gotoVLayout.addWidget(self.tableView2)
+
+        hLayout.addLayout(gotoVLayout)
+
+        self.setLayout(hLayout)
+
+
+    def calculate(self):
+        try:
+            res = self.te.toPlainText().split("\n")
+            lr0table=LR0Table(res)
+            lr0table.getVisibleLR0Table()
+
+            self.model1=QStandardItemModel(len(lr0table.visibleTable_VT)-1,
+            len(lr0table.visibleTable_VT[0]))
+            self.model1.setHorizontalHeaderLabels(lr0table.visibleTable_VT[0][:])
+      
+            for row in range(len(lr0table.visibleTable_VT)-1):
+                for column in range(1,len(lr0table.visibleTable_VT[0])):
+                    item=QStandardItem(lr0table.visibleTable_VT[row+1][column])
+                    self.model1.setItem(row,column,item)
+            
+            for row in range(0,len(lr0table.visibleTable_VT)-1):
+                item=QStandardItem(str(row))
+                item.setToolTip("state"+str(row)+":\n"+lr0table.lr0.getStateStr(row))
+                self.model1.setItem(row,0,item)
+                
+            
+            self.tableView1.setModel(self.model1)
+
+            ### 表格2
+            self.model2=QStandardItemModel(len(lr0table.visibleTable_VN)-1,
+            len(lr0table.visibleTable_VN[0])-1)
+            self.model2.setHorizontalHeaderLabels(lr0table.visibleTable_VN[0][1:])
+            
+
+            for row in range(len(lr0table.visibleTable_VN)-1):
+                for column in range(len(lr0table.visibleTable_VN[0])-1):
+                    item=QStandardItem(lr0table.visibleTable_VN[row+1][column+1])
+                    self.model2.setItem(row,column,item)
+            self.tableView2.setModel(self.model2)
+            
+            
+        except:
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("错误")
+            errorMessage.setText("输入有误，请检查您的输入！")
+            errorMessage.exec_()
+
+    def getExample(self):
+        self.te.setText("S->E\nE->E+T\nE->T\nT->T*F\nT->F\nF->(E)\nF->i")
 
 
 class WidgetUI7(QWidget):
