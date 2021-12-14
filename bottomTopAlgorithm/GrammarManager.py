@@ -17,6 +17,7 @@ class GrammarManager:
         self.basicFirstSet = dict()
         self.FIRSTVT = dict()
         self.LASTVT = dict()
+        self.FOLLOWSET = dict()
         print("初始化中")
 
     # 接受输入
@@ -77,7 +78,7 @@ class GrammarManager:
         if (not "'" in self.sentences[0][0]) and LRAnalysis:
             print("手动增加了拓广文法")
             self.sentences.insert(0, [self.sentences[0][0]+"'",self.sentences[0][0]])
-
+        print("结果为",self.sentences)
         # 计算终结符和非终结符
         self.calculateVTandVN()
 
@@ -259,7 +260,7 @@ class GrammarManager:
 
         # 接下来遍历sentences然后逐一进行处理入栈
         for sentence in self.sentences:
-
+            sentence = sentence.copy()
             # 这里要先进行处理:
             if choice == "LAST":
                 tmp = sentence[1]
@@ -345,6 +346,92 @@ class GrammarManager:
                 if math_tag == 1:
                     result_set = grammar_sentence[0]+"→"+grammar_sentence[1]
         return result_set
+
+
+    '''
+    输入文法，计算所有非终结符的follow集合’
+    '''
+    def calculate_follow(self):
+
+        # 初始化follow列表
+        for VN_symbol in self.VN:
+            self.FOLLOWSET[VN_symbol] = set()
+        # 若A为文法开始符号，则置#于follow(A)中
+        self.FOLLOWSET[self.get_start_symbol()].add('#')
+        #  第一条规则
+        #  遍历每一个产生式
+        for production_sentence in self.sentences:
+            # 一个产生式是否为B->αAβ形式
+            if len(self.is_first_follow_generation_rule(production_sentence)) != 0:
+                # 获取到目标的非终结符A
+                for result in self.is_first_follow_generation_rule(production_sentence):
+                    VN_char = result[0]  # 对应的A
+                    # 将所有的first(β)-e加入
+                    # print("当前串的first集合:",self.getFirstSet(result[1]))
+                    for first_item in self.getFirstSet(result[1]):
+                        if first_item != 'ε':
+                            self.FOLLOWSET[VN_char].add(first_item)
+        # print(self.FOLLOWSET)
+        #  第二条规则
+        while True:
+            changeTag = False
+            for production in self.sentences:
+                result_set = self.is_second_follow_generation_rule(production)
+                if len(result_set) != 0:
+                    #逐个将follow(B) 加入到 follow(A)中
+                    for result in result_set:
+                        before_len = len(self.FOLLOWSET[result[1]])
+                        follow_list = self.FOLLOWSET[result[0]] # 即follow(B)
+                        if len(follow_list) != 0:
+                            for follow_item in follow_list:
+                                self.FOLLOWSET[result[1]].add(follow_item) # 依次加入
+                        after_len = len(self.FOLLOWSET[result[1]])
+                        if after_len != before_len:
+                            changeTag = True
+            if changeTag == False: #  若不再改变，则退出循环
+                break
+
+    '''
+    判断一个产生式是否为B->αAβ形式,返回数组，分别为对应的A,对应的β
+    '''
+    def is_first_follow_generation_rule(self,sentence):
+        result = []
+        for VN_symbol in self.VN:
+            if VN_symbol in sentence[1]:
+                for index_vn in range(len(sentence[1])):
+                    if sentence[1][index_vn] == VN_symbol:
+                        ind = sentence[1].find(VN_symbol,index_vn)
+                        if ind != -1:
+                            result.append([VN_symbol, sentence[1][ind+1:]])
+
+        return result
+
+
+    '''
+    判断一个产生式是否为B->αA或B->αAβ
+    返回[B,A]
+    '''
+    def is_second_follow_generation_rule(self,sentence):
+        result = []
+        # 如果为B->αA的形式，即最后一个字符是非终结符
+        for VN_symbol in self.VN:
+            if sentence[-1][-1] == VN_symbol:
+                result.append([sentence[0],sentence[1][-1]])
+            elif VN_symbol in sentence[1]:
+                result_sentence = sentence[1].split(VN_symbol)
+                beta_str = result_sentence[-1]
+                for production in self.sentences:
+                    if production[1] == 'ε' and production[0] == beta_str:
+                        result.append([sentence[0],VN_symbol])
+        return result
+
+
+    '''
+    获取文法的开始符号
+    '''
+    def get_start_symbol(self):
+        return self.sentences[0][0]
+
 
 if __name__ == '__main__':
     g = GrammarManager()

@@ -152,6 +152,7 @@ E->(E)
 E->i
 """            
 if __name__ == "__main__":
-    
-    table = LR0Table()
+    sentences = ["S->E", "E->E+T", "E->T", "T->T*F", "T->F", "F->(E)", "F->i"]
+    table = LR0Table(sentences)
+    table.getVisibleLR0Table()
     table.showVisibleLR0Table()          
