@@ -17,6 +17,7 @@ class SLRTable:
         self.lr0.setGrammar(sentences)
         self.lr0.calculateDFA()
         self.VN = self.lr0.grammarManager.VN
+        self.VN = self.VN[1:]
         self.VT = self.lr0.grammarManager.VT
         self.VT.append('#')
         self.action = [[["", -1] for i in range(len(self.VT))] for j in
@@ -43,21 +44,21 @@ class SLRTable:
                 if project_sentence[2] < len(project_sentence[1]) and project_sentence[1][project_sentence[2]] in self.VT:
                     alpha_VT = project_sentence[1][project_sentence[2]]
                     go_result = self.lr0.translationArray[(Ik_set, alpha_VT)]
-                    self.action[Ik_set][self.VT.index(alpha_VT)-1][0] = 's'
-                    self.action[Ik_set][self.VT.index(alpha_VT)-1][1] = go_result
+                    self.action[Ik_set][self.VT.index(alpha_VT)][0] = 's'
+                    self.action[Ik_set][self.VT.index(alpha_VT)][1] = go_result
                     continue
                 # 条件2：A->α·属于Ik
                 if project_sentence[2] == len(project_sentence[1]) and project_sentence[0] in self.VN:
                     for VT_symbol in self.VT:
                         if VT_symbol in self.FollowSet[project_sentence[0]]:
-                            self.action[Ik_set][self.VT.index(VT_symbol)-1][0] = 'r'
+                            self.action[Ik_set][self.VT.index(VT_symbol)][0] = 'r'
                             # 获取产生式编号
                             item_num = 0
                             for i in range(len(self.lr0.grammarManager.sentences)):
                                 if project_sentence[0] in self.lr0.grammarManager.sentences[i] and \
                                         project_sentence[1] in self.lr0.grammarManager.sentences[i]:
                                     item_num = i
-                            self.action[Ik_set][self.VT.index(VT_symbol)-1][1] = item_num
+                            self.action[Ik_set][self.VT.index(VT_symbol)][1] = item_num
                             continue
                 # 条件3:S'->S·属于Ik
                 if 'S\'' in project_sentence[0] and 'S' in project_sentence[1] and project_sentence[2] == 1:
@@ -66,7 +67,7 @@ class SLRTable:
         # 条件4：直接遍历状态转移字典
         for go_key in self.lr0.translationArray.keys():
             if go_key[1] in self.VN:
-                self.goto[go_key[0]][self.VN.index(go_key[1])-1] = self.lr0.translationArray[go_key]
+                self.goto[go_key[0]][self.VN.index(go_key[1])] = self.lr0.translationArray[go_key]
 
 
 
@@ -82,3 +83,6 @@ if __name__ == '__main__':
     print(len(slr_table.action[0]))
     print(slr_table.VN)
     print(len(slr_table.goto[0]))
+    print('状态转移矩阵')
+    print(slr_table.lr0.translationArray)
+    print(slr_table.lr0.states)
