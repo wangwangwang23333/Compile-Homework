@@ -63,8 +63,6 @@ class SLRTable:
                 if 'S\'' in project_sentence[0] and 'S' in project_sentence[1] and project_sentence[2] == 1:
                     self.action[Ik_set][self.VT.index('#')-1][0] = 'acc'
                     self.action[Ik_set][self.VT.index('#')-1][1] = -1
-        print(self.VN)
-        print(self.VT)
         # 条件4：直接遍历状态转移字典
         for go_key in self.lr0.translationArray.keys():
             if go_key[1] in self.VN:
@@ -78,7 +76,6 @@ class SLRTable:
 if __name__ == '__main__':
     test_sentence = ["S->E", "E->E+T", "E->T", "T->T*F", "T->F", "F->(E)", "F->i"]
     slr_table = SLRTable(test_sentence)
-    print('状态转移矩阵')
     slr_table.get_SLR_analysis_table()
     print(slr_table.action)
     print(slr_table.goto)
