@@ -367,11 +367,11 @@ class GrammarManager:
                 for result in self.is_first_follow_generation_rule(production_sentence):
                     VN_char = result[0]  # 对应的A
                     # 将所有的first(β)-e加入
-                    print("当前串的first集合:",self.getFirstSet(result[1]))
+                    # print("当前串的first集合:",self.getFirstSet(result[1]))
                     for first_item in self.getFirstSet(result[1]):
                         if first_item != 'ε':
                             self.FOLLOWSET[VN_char].add(first_item)
-        print(self.FOLLOWSET)
+        # print(self.FOLLOWSET)
         #  第二条规则
         while True:
             changeTag = False
