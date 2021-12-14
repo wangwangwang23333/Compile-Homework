@@ -567,3 +567,7 @@ E->i
 #     print(lr1.get_numbered_and_looking_forward_transfer_array())
 #     print(lr1.translationArray)
 # =============================================================================
+    print(lr1.states)
+    print(len(lr1.states))
+    print(lr1.translationArray)
+    print(lr1.getGoIX(0,'('))
