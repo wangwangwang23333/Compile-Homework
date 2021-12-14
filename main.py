@@ -692,47 +692,41 @@ class WidgetUI6(QWidget):
         try:
             res = self.te.toPlainText().split("\n")
             slr_table = SLRTable(res)
-            print(slr_table.VT)
-            print(slr_table.VN)
+
             slr_table.get_SLR_analysis_table()
-            print(slr_table.action[0])
-            print(len(slr_table.action[0]))
-            print(slr_table.goto)
 
-            lr0table=LR0Table(res)
+            self.model1=QStandardItemModel(len(slr_table.action),
+            len(slr_table.action[0])+1)
+            self.model1.setVerticalHeaderLabels([str(i) for i in range(len(slr_table.action))])
+            self.model1.setHorizontalHeaderLabels(['']+slr_table.VT)
+            for row in range(len(slr_table.action)):
+                for column in range(0,len(slr_table.action[0])):
+                    if slr_table.action[row][column][1]!=-1:
+                        item=QStandardItem(slr_table.action[row][column][0]+str(slr_table.action[row][column][1]))
+                        self.model1.setItem(row,column+1,item)
+                    elif slr_table.action[row][column][0]=="acc":
+                        item=QStandardItem(slr_table.action[row][column][0])
+                        self.model1.setItem(row,column+1,item)
             
-            lr0table.getVisibleLR0Table()
-
-            self.model1=QStandardItemModel(len(lr0table.visibleTable_VT)-1,
-            len(lr0table.visibleTable_VT[0]))
-            self.model1.setHorizontalHeaderLabels(lr0table.visibleTable_VT[0][:])
-      
-            for row in range(len(lr0table.visibleTable_VT)-1):
-                for column in range(1,len(lr0table.visibleTable_VT[0])):
-                    item=QStandardItem(lr0table.visibleTable_VT[row+1][column])
-                    self.model1.setItem(row,column,item)
-            
-            for row in range(0,len(lr0table.visibleTable_VT)-1):
+            for row in range(len(slr_table.action)):
                 item=QStandardItem(str(row))
-                item.setToolTip("state"+str(row)+":\n"+lr0table.lr0.getStateStr(row))
+                item.setToolTip("state"+str(row)+":\n"+slr_table.lr0.getStateStr(row))
                 self.model1.setItem(row,0,item)
                 
-            
             self.tableView1.setModel(self.model1)
 
             ### 表格2
-            self.model2=QStandardItemModel(len(lr0table.visibleTable_VN)-1,
-            len(lr0table.visibleTable_VN[0])-1)
-            self.model2.setHorizontalHeaderLabels(lr0table.visibleTable_VN[0][1:])
+            self.model2=QStandardItemModel(len(slr_table.goto),
+            len(slr_table.goto[0])) #不要拓广文法
+            self.model2.setHorizontalHeaderLabels(slr_table.VN)
             
 
-            for row in range(len(lr0table.visibleTable_VN)-1):
-                for column in range(len(lr0table.visibleTable_VN[0])-1):
-                    item=QStandardItem(lr0table.visibleTable_VN[row+1][column+1])
-                    self.model2.setItem(row,column,item)
+            for row in range(len(slr_table.goto)):
+                for column in range(len(slr_table.goto[0])):
+                    if slr_table.goto[row][column]!=-1:
+                        item=QStandardItem(str(slr_table.goto[row][column]))
+                        self.model2.setItem(row,column,item)
             self.tableView2.setModel(self.model2)
-            
-            
         except:
             errorMessage=QMessageBox()
             errorMessage.setWindowTitle("错误")
@@ -740,7 +734,7 @@ class WidgetUI6(QWidget):
             errorMessage.exec_()
 
     def getExample(self):
-        self.te.setText("S->E\nE->E+T\nE->T\nT->T*F\nT->F\nF->(E)\nF->i")
+        self.te.setText("E'->E\nE->E+T\nE->T\nT->T*F\nT->F\nF->(E)\nF->i")
 
 
 class WidgetUI7(QWidget):
