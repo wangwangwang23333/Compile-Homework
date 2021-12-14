@@ -79,3 +79,6 @@ if __name__ == '__main__':
     slr_table.get_SLR_analysis_table()
     print(slr_table.action)
     print(slr_table.goto)
+    print(len(slr_table.action[0]))
+    print(slr_table.VN)
+    print(len(slr_table.goto[0]))
