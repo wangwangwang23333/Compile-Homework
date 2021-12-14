@@ -14,7 +14,7 @@ class SLRTable:
 
     def __init__(self, sentences):
         self.lr0 = LR0()
-        self.lr0.setGrammar(sentences)
+        self.lr0.grammarManager.getStr(sentences,False)
         self.lr0.calculateDFA()
         self.VN = self.lr0.grammarManager.VN
         self.VN = self.VN[1:]
@@ -51,6 +51,7 @@ class SLRTable:
                 if project_sentence[2] == len(project_sentence[1]) and project_sentence[0] in self.VN:
                     for VT_symbol in self.VT:
                         if VT_symbol in self.FollowSet[project_sentence[0]]:
+                            print(self.FollowSet)
                             self.action[Ik_set][self.VT.index(VT_symbol)][0] = 'r'
                             # 获取产生式编号
                             item_num = 0
@@ -61,7 +62,7 @@ class SLRTable:
                             self.action[Ik_set][self.VT.index(VT_symbol)][1] = item_num
                             continue
                 # 条件3:S'->S·属于Ik
-                if 'S\'' in project_sentence[0] and 'S' in project_sentence[1] and project_sentence[2] == 1:
+                if self.lr0.grammarManager.sentences[0][0] in project_sentence[0] and project_sentence[2] == 1:
                     self.action[Ik_set][self.VT.index('#')][0] = 'acc'
                     self.action[Ik_set][self.VT.index('#')][1] = -1
         # 条件4：直接遍历状态转移字典
@@ -75,14 +76,24 @@ class SLRTable:
 
 
 if __name__ == '__main__':
-    test_sentence = ["S->E", "E->E+T", "E->T", "T->T*F", "T->F", "F->(E)", "F->i"]
+    test_sentence = ["S'->E", "E->E+T", "E->T", "T->T*F", "T->F", "F->(E)", "F->i"]
     slr_table = SLRTable(test_sentence)
     slr_table.get_SLR_analysis_table()
     print(slr_table.action)
     print(slr_table.goto)
-    print(len(slr_table.action[0]))
+    print('action')
+    for i in slr_table.action:
+        print(i)
+    print('goto')
+    for j in slr_table.goto:
+        print(j)
     print(slr_table.VN)
     print(len(slr_table.goto[0]))
     print('状态转移矩阵')
     print(slr_table.lr0.translationArray)
-    print(slr_table.lr0.states)
+    for i in slr_table.lr0.states:
+        print(i)
+    print(len(slr_table.lr0.states))
+    print(slr_table.lr0.grammarManager.sentences)
+    print('follow元素')
+    print(slr_table.FollowSet)
