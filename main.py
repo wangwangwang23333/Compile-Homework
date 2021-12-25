@@ -5,6 +5,7 @@ Created on Sat Dec  4 22:09:34 2021
 @author: 1851055 汪明杰
 """
 import sys
+import os
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon,QStandardItem,QStandardItemModel
 from PyQt5 import QtCore
@@ -77,10 +78,30 @@ class MainForm(QMainWindow):
         envAct.triggered.connect(self.envAction)
         menubar.addAction(envAct)
 
+        # 清除缓存
+        delAct=QAction(QIcon("qt.png"), "清理", self)
+        delAct.setStatusTip("清除本项目使用过程中产生的缓存")
+        delAct.triggered.connect(self.delAction)
+        menubar.addAction(delAct)
+
         envAct = QAction(QIcon("qt.png"), "说明", self)
         envAct.setStatusTip("查看本项目简介")
         envAct.triggered.connect(self.introAction)
         menubar.addAction(envAct)
+
+    def delAction(self):
+        baseUrl="outputImage"
+        if not os.path.exists(baseUrl):
+            os.mkdir(baseUrl)
+        ls = os.listdir(baseUrl)
+        for i in ls:
+            c_path=os.path.join(baseUrl,i)
+            os.remove(c_path)
+        
+        errorMessage=QMessageBox()
+        errorMessage.setWindowTitle("清理缓存")
+        errorMessage.setText("成功清理全部缓存文件!")
+        errorMessage.exec_()
         
     def envAction(self):
         try:
