@@ -23,7 +23,7 @@ from bottomTopAlgorithm.stack import Stack
 import uuid
 from graphviz import Digraph
 
-class MainForm(QTabWidget):
+class MainForm(QMainWindow):
     
     def __init__(self):
         super().__init__()
@@ -42,6 +42,7 @@ class MainForm(QTabWidget):
         self.move(qr.topLeft())
         
         # 选项卡控件
+        self.tw=QTabWidget(self)
         self.tab1=WidgetUI1()
         self.tab2=WidgetUI2()
         self.tab3=WidgetUI3()
@@ -54,18 +55,52 @@ class MainForm(QTabWidget):
         self.tab10=ComprehensiveExperiment()
         
         # 加入顶层窗口
-        self.addTab(self.tab1,"算法3.1")
-        self.addTab(self.tab2,"算法3.2")
-        self.addTab(self.tab3,"算法3.3")
-        self.addTab(self.tab4,"算法3.4")
-        self.addTab(self.tab5,"算法3.5")
-        self.addTab(self.tab6,"算法3.6")
-        self.addTab(self.tab7,"算法3.7")
-        self.addTab(self.tab8,"算法3.8")
-        self.addTab(self.tab9,"算法3.9")
-
-        self.addTab(self.tab10,"综合实验")
+        self.tw.addTab(self.tab1,"算法3.1")
+        self.tw.addTab(self.tab2,"算法3.2")
+        self.tw.addTab(self.tab3,"算法3.3")
+        self.tw.addTab(self.tab4,"算法3.4")
+        self.tw.addTab(self.tab5,"算法3.5")
+        self.tw.addTab(self.tab6,"算法3.6")
+        self.tw.addTab(self.tab7,"算法3.7")
+        self.tw.addTab(self.tab8,"算法3.8")
+        self.tw.addTab(self.tab9,"算法3.9")
+        self.tw.addTab(self.tab10,"综合实验")
         
+        self.setCentralWidget(self.tw)
+
+        # 菜单栏
+        menubar = self.menuBar()
+
+        # 检查环境
+        envAct = QAction(QIcon("qt.png"), "测试", self)
+        envAct.setShortcut("Ctrl + Q")
+        envAct.setStatusTip("检查当前设备环境是否能正常运行本系统")
+        envAct.triggered.connect(self.envAction)
+        menubar.addAction(envAct)
+
+        envAct = QAction(QIcon("qt.png"), "说明", self)
+        envAct.setStatusTip("查看本项目简介")
+        envAct.triggered.connect(self.introAction)
+        menubar.addAction(envAct)
+        
+    def envAction(self):
+        try:
+            g = Digraph("test", format="png")
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("环境正常")
+            errorMessage.setText("您的环境变量已配置graphviz,可正常使用!")
+            errorMessage.exec_()
+        except:
+            errorMessage=QMessageBox()
+            errorMessage.setWindowTitle("环境异常")
+            errorMessage.setText("您的环境变量中没有配置graphviz,请先配置该软件，以便生成DFA图和语法树!")
+            errorMessage.exec_()
+
+    def introAction(self):
+        errorMessage=QMessageBox()
+        errorMessage.setWindowTitle("说明")
+        errorMessage.setText("本项目为软件工程编译原理课程大作业，成员:\n1851055 汪明杰\n1850384 卓正一\n1851231 王立友\n1853572 梁乔")
+        errorMessage.exec_()
  
 class WidgetUI1(QWidget):
     def __init__(self):
