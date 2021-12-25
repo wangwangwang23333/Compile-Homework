@@ -72,8 +72,7 @@ class MainForm(QMainWindow):
         menubar = self.menuBar()
 
         # 检查环境
-        envAct = QAction(QIcon("qt.png"), "测试", self)
-        envAct.setShortcut("Ctrl + Q")
+        envAct = QAction(QIcon("qt.png"), "调试", self)
         envAct.setStatusTip("检查当前设备环境是否能正常运行本系统")
         envAct.triggered.connect(self.envAction)
         menubar.addAction(envAct)
@@ -85,7 +84,9 @@ class MainForm(QMainWindow):
         
     def envAction(self):
         try:
-            g = Digraph("test", format="png")
+            imgUrl = 'outputImage//测试程序' + str(uuid.uuid1())
+            g = Digraph(imgUrl, format="png")
+            g.render(imgUrl)
             errorMessage=QMessageBox()
             errorMessage.setWindowTitle("环境正常")
             errorMessage.setText("您的环境变量已配置graphviz,可正常使用!")
