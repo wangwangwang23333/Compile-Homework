@@ -183,7 +183,6 @@ class WidgetUI1(QWidget):
             for i in g.LASTVT:
                 outputStr+=str(i)+":"+str(g.LASTVT[i])+"\n"   
             self.outputArea.setText(outputStr)
-            print("res",res)
         except:
             errorMessage=QMessageBox()
             errorMessage.setWindowTitle("错误")
@@ -378,13 +377,10 @@ class WidgetUI4(QWidget):
                 lr0=LR1()
             lr0.setGrammar(res)
             lr0.calculateDFA()
-            print(lr0.translationArray)
 
             transCondition=lr0.grammarManager.VT+lr0.grammarManager.VN
-            print("test",transCondition)
             transCondition.remove(lr0.grammarManager.sentences[0][0])
-            
-            print(transCondition)
+
 
             # 建立表格
             self.model=QStandardItemModel(len(lr0.states),len(transCondition))
@@ -404,8 +400,7 @@ class WidgetUI4(QWidget):
             self.g.render(baseUrl)
             self.imgUrl=baseUrl+".png"
             self.tableView.setModel(self.model)
-            
-            print(self.imgUrl)
+
             # 加载图片
             DFAImage = QPixmap(self.imgUrl).scaledToHeight(500)
             self.imageLabel.setPixmap(DFAImage)
@@ -903,7 +898,6 @@ class WidgetUI7(QWidget):
                     item=QStandardItem(str(printTable[row+1][column+1+len(lr1Table.table_VT)]))
                     self.model2.setItem(row,column,item)
             self.tableView2.setModel(self.model2)
-            print(self.model2)
             
         except:
             errorMessage=QMessageBox()
@@ -995,7 +989,6 @@ class WidgetUI8(QWidget):
             lr1.setGrammar(res)
             lalrTable = LALRTable(lr1)
 
-            print(lalrTable.states)
 
             printTable=lalrTable.get_visible_table()
 
@@ -1028,7 +1021,6 @@ class WidgetUI8(QWidget):
                     item=QStandardItem(str(printTable[row+1][column+1+len(lalrTable.table_VT)]))
                     self.model2.setItem(row,column,item)
             self.tableView2.setModel(self.model2)
-            print(self.model2)
             
         except:
             errorMessage=QMessageBox()
@@ -1213,12 +1205,9 @@ class WidgetUI9(QWidget):
                 # 获取栈顶元素
                 curState=stateStack.peek()
                 curInput=inputList[curIndex]
-                
-                print((curState,curInput))
+
                 # 获取curInput在VT中的位置
                 curInputCol=self.VT.index(curInput)
-
-                print(self.model1.item(curState,curInputCol).text())
 
                 # 获取其对应的act
                 nextAct=self.model1.item(curState,curInputCol).text()
@@ -1229,18 +1218,13 @@ class WidgetUI9(QWidget):
                 if nextAct[0] == "s":
                     stateStack.push(int(nextAct[1:]))
                     curIndex+=1
-                    print("接受输入"+curInput+",跳转到状态"+nextAct[1:])
 
                     # 移进，则往语法树中增加新的结点
                     g.node(name=str(nodeIndex), label=curInput,shape="none")
                     nodeList.append([nodeIndex,curInput])
                     nodeIndex+=1
-                    print("nodeList新增结点"+str(nodeList))
-
                 elif nextAct[0] == "r":
                     # 使用产生式A->β
-                    print("需要使用产生式"+nextAct[1:]+"进行规约")
-                    print(self.grammarManager.sentences[int(nextAct[1:])])
                     reduceSentence=self.grammarManager.sentences[int(nextAct[1:])]
                     reduceSentences.append(reduceSentence)
                     # 出栈|β|个状态
@@ -1249,9 +1233,6 @@ class WidgetUI9(QWidget):
                         stateStack.pop()
                     # 获取栈顶元素t
                     curState=stateStack.peek()
-                    print("当前状态为"+str(curState)+",正在接收输入"+reduceSentence[0])
-                    
-                    print(self.VN.index(reduceSentence[0]))
                     
                     # 获取goto[t,A]
                     nextState=self.model2.item(curState,self.VN.index(reduceSentence[0])).text()
@@ -1274,7 +1255,6 @@ class WidgetUI9(QWidget):
                                 # 找到了
                                 findIndex=j
                                 break
-                        print("nodeList为"+str(nodeList))
                         if findIndex==-1:
                             raise Exception("绘图错误")
                         
@@ -1293,8 +1273,7 @@ class WidgetUI9(QWidget):
                 else:
                     # success
                     break
-            
-            print(reduceSentences)
+
             # 加入到输出中
             outputStr=""
             for index,item in enumerate(reduceSentences):
@@ -1407,8 +1386,6 @@ class WidgetUI9(QWidget):
             res = self.te.toPlainText().split("\n")
             self.grammarManager=GrammarManager()
             self.grammarManager.getStr(res,False)
-            print(self.grammarManager.VT)
-            print(self.grammarManager.VN)
 
             ## ACTION表
             self.model1=QStandardItemModel(1, len(self.grammarManager.VT)+1)
@@ -1579,18 +1556,14 @@ class ComprehensiveExperiment(QWidget):
                     if nextAct.action == "shift":
                         stateStack.push(nextAct.state)
                         curIndex+=1
-                        print("接受输入"+curInput+",跳转到状态"+str(nextAct.state))
 
                         # 移进，则往语法树中增加新的结点
                         g.node(name=str(nodeIndex), label=curInput,shape="none")
                         nodeList.append([nodeIndex,curInput])
                         nodeIndex+=1
-                        print("nodeList新增结点"+str(nodeList))
 
                     elif nextAct.action == "reduce":
                         # 使用产生式A->β
-                        print("需要使用产生式"+str(nextAct.state)+"进行规约")
-                        print(lr1Table.lr1.grammarManager.sentences[nextAct.state])
                         reduceSentence=lr1Table.lr1.grammarManager.sentences[nextAct.state]
                         reduceSentences.append(reduceSentence)
                         # 出栈|β|个状态
@@ -1599,7 +1572,6 @@ class ComprehensiveExperiment(QWidget):
                             stateStack.pop()
                         # 获取栈顶元素t
                         curState=stateStack.peek()
-                        print("当前状态为"+str(curState))
                         # 获取goto[t,A]
                         nextState=lr1Table.goto[(curState,reduceSentence[0])]
                         # 将其加入栈中
@@ -1619,7 +1591,6 @@ class ComprehensiveExperiment(QWidget):
                                     # 找到了
                                     findIndex=j
                                     break
-                            print("nodeList为"+str(nodeList))
                             if findIndex==-1:
                                 raise Exception("绘图错误")
                             
@@ -1652,7 +1623,6 @@ class ComprehensiveExperiment(QWidget):
                 outputStr+=item[0]+"->"+item[1]
             self.analysisOutput.setText(outputStr)
 
-            print(imgUrl)
             g.render(imgUrl)
 
             DFAImage = QPixmap(imgUrl+".png").scaledToHeight(500)

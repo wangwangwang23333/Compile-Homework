@@ -18,7 +18,6 @@ class GrammarManager:
         self.FIRSTVT = dict()
         self.LASTVT = dict()
         self.FOLLOWSET = dict()
-        print("初始化中")
 
     # 接受输入
     def getInput(self):
@@ -33,8 +32,6 @@ class GrammarManager:
             elif "→" in sentence:
                 newSentence = sentence.split("→")
             else:
-                print(sentence)
-                print("error1")
                 raise Exception("不含分隔符")
 
             if len(newSentence[1]) == 0:
@@ -47,7 +44,6 @@ class GrammarManager:
 
         # 计算终结符和非终结符
         self.calculateVTandVN()
-        # print(self.sentences)
 
     # 给定字符串
     def getStr(self, sentences, LRAnalysis = True):
@@ -62,8 +58,6 @@ class GrammarManager:
             elif "→" in sentence:
                 newSentence = sentence.split("→")
             else:
-                print(sentence)
-                print("error1")
                 raise Exception("不含分隔符")
 
             if len(newSentence[1]) == 0:
@@ -76,9 +70,7 @@ class GrammarManager:
 
         # 增加拓广文法(LR文法需要)
         if (not "'" in self.sentences[0][0]) and LRAnalysis:
-            print("手动增加了拓广文法")
             self.sentences.insert(0, [self.sentences[0][0]+"'",self.sentences[0][0]])
-        print("结果为",self.sentences)
         # 计算终结符和非终结符
         self.calculateVTandVN()
 
@@ -88,7 +80,6 @@ class GrammarManager:
 
     def calculateVTandVN(self):
         if len(self.VT) > 0:
-            print("终结符和非终结符已经计算过！")
             return
         for i in range(len(self.sentences)):
             for j in range(2):
@@ -251,7 +242,6 @@ class GrammarManager:
 
         # 检测是否有终结符与非终结符
         if len(self.VN) == 0 or len(self.VT) == 0:
-            print("输入终结符或非终结符!")
             return
 
         # 构造二维布尔矩阵F[P,a]和符号栈stack
@@ -333,7 +323,6 @@ class GrammarManager:
     '''
     def statute_sentence(self,sentence_pattern):
         result_set = ""
-        print(self.sentences)
         for grammar_sentence in self.sentences:
             compare_sentence = grammar_sentence[1]
             if len(compare_sentence) == len(sentence_pattern):

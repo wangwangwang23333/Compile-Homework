@@ -33,7 +33,6 @@ class OperatorPrecedenceGrammar:
     '''
 
     def getPriorityTable(self):
-        print(self.grammarManager.sentences)
         if len(self.grammarManager.FIRSTVT) == 0:
             self.grammarManager.getFirstAndLastVT()
 
@@ -102,7 +101,6 @@ class OperatorPrecedenceGrammar:
         while True:
             # 获取栈顶算符，k为栈顶
             a = input_str[strReader]
-            print(self.grammarManager.VT)
             if self.grammarManager.isVT(symbol_stack.items[stack_iterator]) :
                 j = stack_iterator
             else:
@@ -141,7 +139,6 @@ class OperatorPrecedenceGrammar:
                 startIndex=nodeIndex
 
                 # 寻找右侧β的每一个结点
-                print(M)
                 for ix in list(M):
                     findIndex=-1
 
@@ -171,7 +168,6 @@ class OperatorPrecedenceGrammar:
                 nodeList.append([nodeIndex,'N'])
                 nodeIndex+=1
 
-                print(symbol_stack.items)
             if priority_table[(symbol_stack.items[j],a)] == '<' or priority_table[(symbol_stack.items[j],a)] == '=':
                 stack_iterator = stack_iterator+1
                 symbol_stack.push(a)
@@ -183,7 +179,6 @@ class OperatorPrecedenceGrammar:
                 g.node(name=str(nodeIndex), label=a,shape="none")
                 nodeList.append([nodeIndex,a])
                 nodeIndex+=1
-                print("nodeList新增结点"+str(nodeList))
             else:
                 return "error!"
             
@@ -205,12 +200,9 @@ if __name__ == '__main__':
     opg = OperatorPrecedenceGrammar()
     sentences=["E->TR","R->+TR","R->ε ","T->FY","Y->*FY","Y->ε","F->(E)","F->i"]
     opg.grammarManager.getStr(sentences,False)
-    print(sentences,opg.grammarManager.sentences)
     #opg.getPriorityTable()
     #print(opg.priorityTable)
     #opg.operatorGrammarAnalysis("i+i*i")
     opg.grammarManager.getBasicFirstSet()
-    print("first",opg.grammarManager.basicFirstSet)
     opg.grammarManager.calculate_follow();
-    print(opg.grammarManager.FOLLOWSET)
     #print(opg.getReduceStringArray())  # productionTable即算符优先文法过程依次使用的文法串
