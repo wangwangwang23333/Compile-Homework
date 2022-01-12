@@ -3,7 +3,9 @@
 
 我们使用Python作为各个算法的编程语言。同时，我们采用了PyQt5作为可视化界面，使用了包括QTableWidget在内的控件实现输入输出的展示。为了实现语法树和DFA图的生成，我们使用了Graphviz包作为有向图（DFA图和语法树）绘制的工具。
 
-<img src="https://s4.ax1x.com/2021/12/25/TU0RoV.md.png">
+<img src="https://s4.ax1x.com/2022/01/12/7uKvkT.png">
+<img src="https://s4.ax1x.com/2022/01/12/7uMVAK.png">
+<img src="https://s4.ax1x.com/2022/01/12/7uMu1H.png">
 
 ## 环境需求
 要运行本项目，请先保证电脑中已有Graphviz环境（配置在环境变量中）
